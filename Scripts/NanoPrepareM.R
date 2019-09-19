@@ -4,8 +4,8 @@
 #' @title Prepares basecalled data 
 #' @description NanoPrepareM prepares MinION and GridION X5 basecalled data for other functions from this package. Name of the function is inherited from NanoR previous version as MinION and GridION X5 had different default-output formats and only MinION outputted basecalled .fast5 files. From MinION release 18.12 and GridION 18.12.1 outputs are the same.
 #' @param DataPass Path to passed .fast5 files folder
-#' @param DataFail Path to failed .fast5 files folder. Default to NA
-#' @param DataSkip Path to skipped .fast5 files folder. Default to NA
+#' @param DataFail Path to failed .fast5 files folder. Default to NULL
+#' @param DataSkip Path to skipped .fast5 files folder. Default to NULL
 #' @param Label Label to identify the experiment. A folder with this name will be created in DataOut directory
 #' @param MultiRead Logical. If TRUE, enable multi-read .fast5 files support. Default to FALSE
 #' @details NanoPreareM can find .fast5 files recursively, so be careful to specify path to folder contaning a unique data type (e.g. only passed .fast5 files for the experiment). DataFail and DataSkip can be omitted.
@@ -23,7 +23,7 @@
 
 
 
-NanoPrepareM<-function(DataPass,DataFail=NA,DataSkip=NA, Label, MultiRead=FALSE) { #simple and fast way to store informations
+NanoPrepareM<-function(DataPass,DataFail=NULL,DataSkip=NULL, Label, MultiRead=FALSE) { #simple and fast way to store informations
   
   PassFiles<-list.files(DataPass, full.names=TRUE, recursive = TRUE, pattern=".fast5")
   
@@ -39,7 +39,7 @@ NanoPrepareM<-function(DataPass,DataFail=NA,DataSkip=NA, Label, MultiRead=FALSE)
 
   }
 
-  if (is.na(DataFail)) {
+  if (is.null(DataFail)) {
     FailFilesLength<-0
     message("No failed .fast5 files path specified")
   }
@@ -80,7 +80,7 @@ NanoPrepareM<-function(DataPass,DataFail=NA,DataSkip=NA, Label, MultiRead=FALSE)
 
   }
   
-  if (is.na(DataSkip)) { #no data skip for multiline? 
+  if (is.null(DataSkip)) { #no data skip for multiline? 
     SkipFilesLength<-0
     message("No skipped .fast5 files path specified")
   }
