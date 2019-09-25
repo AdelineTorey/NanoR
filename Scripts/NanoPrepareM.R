@@ -24,109 +24,68 @@
 
 
 NanoPrepareM <- function(DataPass, DataFail = NULL, DataSkip = NULL, Label, MultiRead = FALSE) { #simple and fast way to store informations
-  
   PassFiles <- list.files(DataPass, full.names = TRUE, recursive = TRUE, pattern = ".fast5")
-  
   if (MultiRead == FALSE) {
-
     message(length(PassFiles), " .fast5 files specified as passed")
-
   }
-
   else {
-
     message(length(PassFiles), " multi-read .fast5 files specified as passed")
-
   }
-
   if (is.null(DataFail)) {
-    FailFilesLength<-0
+    FailFilesLength <- 0
     message("No failed .fast5 files path specified")
   }
-
   else {
-
     if (MultiRead == FALSE) {
-
       FailFilesLength <- length(list.files(DataFail, recursive = TRUE, pattern = ".fast5"))
       message(FailFilesLength, " .fast5 files specified as failed")
     }
-
     else {
-
       library(rhdf5)
-
       FailFilesLength <- 0
       FailFiles <- list.files(DataFail, recursive = TRUE, pattern = ".fast5", full.names = TRUE)
       message(length(FailFiles), " multi-read .fast5 files specified as failed")
-
-
       FailFilesOrdered <- FailFiles[order(as.numeric(gsub("[^0-9]+", "", FailFiles)))]
-
       First <- FailFilesOrdered[1]
       FileOpen <- H5Fopen(First)
       howmany <- nrow(h5ls(FileOpen, recursive=FALSE, datasetinfo=FALSE))
       H5Fclose(FileOpen)
-
       Last <- FailFilesOrdered[length(FailFilesOrdered)]
       FileOpen <- H5Fopen(Last)
       howmany_ <- nrow(h5ls(FileOpen, recursive=FALSE, datasetinfo=FALSE))
       H5Fclose(FileOpen)
-
       FailFilesLength <- (howmany * (length(FailFiles)-1) + howmany_)
-
     }
-
-
   }
-  
   if (is.null(DataSkip)) { #no data skip for multiline? 
     SkipFilesLength <- 0
     message("No skipped .fast5 files path specified")
   }
-
   else {
-
     if (MultiRead == FALSE) {
-
       SkipFilesLength <- length(list.files(DataSkip, recursive = TRUE, pattern = ".fast5"))
       message(SkipFilesLength, " .fast5 files specified as skipped")
-
     }
-
     else { ## don't think is needed
-
       library(rhdf5)
-
       SkipFilesLength <- 0
       SkipFiles <- list.files(DataSkip, recursive = TRUE, pattern = ".fast5", full.names = TRUE)
       message(length(SkipFiles), " multi-read .fast5 files specified as skipped")
 
-
       SkipFilesOrdered <- SkipFiles[order(as.numeric(gsub("[^0-9]+", "", SkipFiles)))]
-
       First <- SkipFilesOrdered[1]
       FileOpen <- H5Fopen(First)
       howmany <- nrow(h5ls(FileOpen, recursive = FALSE, datasetinfo = FALSE))
       H5Fclose(FileOpen)
-
       Last <- SkipFilesOrdered[length(SkipFilesOrdered)]
       FileOpen <- H5Fopen(Last)
       howmany_ <- nrow(h5ls(FileOpen, recursive = FALSE, datasetinfo = FALSE))
       H5Fclose(FileOpen)
-
       SkipFilesLength <- (howmany * (length(SkipFiles)-1) + howmany_)
-
     }
-
   }
-
   Label <- as.character(Label)
-  
   List <- list(PassFiles, FailFilesLength, SkipFilesLength, Label, MultiRead)
-
   message("Done")  
-
   return(List)
-
 }
