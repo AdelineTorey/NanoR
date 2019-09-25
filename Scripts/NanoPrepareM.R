@@ -71,7 +71,6 @@ NanoPrepareM <- function(DataPass, DataFail = NULL, DataSkip = NULL, Label, Mult
       SkipFilesLength <- 0
       SkipFiles <- list.files(DataSkip, recursive = TRUE, pattern = ".fast5", full.names = TRUE)
       message(length(SkipFiles), " multi-read .fast5 files specified as skipped")
-
       SkipFilesOrdered <- SkipFiles[order(as.numeric(gsub("[^0-9]+", "", SkipFiles)))]
       First <- SkipFilesOrdered[1]
       FileOpen <- H5Fopen(First)
