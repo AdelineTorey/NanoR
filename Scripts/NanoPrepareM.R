@@ -27,20 +27,17 @@ NanoPrepareM <- function(DataPass, DataFail = NULL, DataSkip = NULL, Label, Mult
   PassFiles <- list.files(DataPass, full.names = TRUE, recursive = TRUE, pattern = ".fast5")
   if (MultiRead == FALSE) {
     message(length(PassFiles), " .fast5 files specified as passed")
-  }
-  else {
+  } else {
     message(length(PassFiles), " multi-read .fast5 files specified as passed")
   }
   if (is.null(DataFail)) {
     FailFilesLength <- 0
     message("No failed .fast5 files path specified")
-  }
-  else {
+  } else {
     if (MultiRead == FALSE) {
       FailFilesLength <- length(list.files(DataFail, recursive = TRUE, pattern = ".fast5"))
       message(FailFilesLength, " .fast5 files specified as failed")
-    }
-    else {
+    } else {
       library(rhdf5)
       FailFilesLength <- 0
       FailFiles <- list.files(DataFail, recursive = TRUE, pattern = ".fast5", full.names = TRUE)
@@ -60,13 +57,11 @@ NanoPrepareM <- function(DataPass, DataFail = NULL, DataSkip = NULL, Label, Mult
   if (is.null(DataSkip)) { #no data skip for multiline? 
     SkipFilesLength <- 0
     message("No skipped .fast5 files path specified")
-  }
-  else {
+  } else {
     if (MultiRead == FALSE) {
       SkipFilesLength <- length(list.files(DataSkip, recursive = TRUE, pattern = ".fast5"))
       message(SkipFilesLength, " .fast5 files specified as skipped")
-    }
-    else { ## don't think is needed
+    } else { ## don't think is needed
       library(rhdf5)
       SkipFilesLength <- 0
       SkipFiles <- list.files(DataSkip, recursive = TRUE, pattern = ".fast5", full.names = TRUE)
