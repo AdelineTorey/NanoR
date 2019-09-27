@@ -24,6 +24,8 @@
 
 
 NanoPrepareM <- function(DataPass, DataFail = NULL, DataSkip = NULL, Label, MultiRead = FALSE) { #simple and fast way to store informations
+  if (!is.character(Label))
+    stop("Label must be character")
   if (!is.logical(MultiRead))
     stop("MultiRead must be logical value")
   
