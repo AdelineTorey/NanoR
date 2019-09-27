@@ -23,7 +23,9 @@
 
 
 
-NanoPrepareM <- function(DataPass, DataFail = NULL, DataSkip = NULL, Label, MultiRead = FALSE) { #simple and fast way to store informations
+NanoPrepareM <- function(DataPass = NULL, DataFail = NULL, DataSkip = NULL, Label, MultiRead = FALSE) { #simple and fast way to store informations
+  if (is.null(DataPass))
+    stop("DataPass must be specified")
   if (!is.character(Label))
     stop("Label must be character")
   if (!is.logical(MultiRead))
