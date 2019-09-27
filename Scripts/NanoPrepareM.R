@@ -24,6 +24,9 @@
 
 
 NanoPrepareM <- function(DataPass, DataFail = NULL, DataSkip = NULL, Label, MultiRead = FALSE) { #simple and fast way to store informations
+  if (!is.logical(MultiRead))
+    stop("MultiRead must be logical value")
+  
   PassFiles <- list.files(DataPass, full.names = TRUE, recursive = TRUE, pattern = ".fast5")
   if (MultiRead == FALSE) {
     message(length(PassFiles), " .fast5 files specified as passed")
