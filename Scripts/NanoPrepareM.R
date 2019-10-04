@@ -23,110 +23,87 @@
 
 
 
-NanoPrepareM<-function(DataPass,DataFail=NA,DataSkip=NA, Label, MultiRead=FALSE) { #simple and fast way to store informations
+NanoPrepareM <- function(DataPass, DataFail = NULL, DataSkip = NULL, Label, MultiRead = FALSE){#simple and fast way to store informations
   
-  PassFiles<-list.files(DataPass, full.names=TRUE, recursive = TRUE, pattern=".fast5")
+  ## List of files in folder provided by DataPass
+  PassFiles <- list.files(DataPass, full.names = TRUE, recursive = TRUE, pattern = ".fast5")
   
-  if (MultiRead == FALSE) {
-
+  ## Print message with the number of files in the DataPass folder
+  if(MultiRead == FALSE){
     message(length(PassFiles), " .fast5 files specified as passed")
-
-  }
-
-  else {
-
+  }else{
     message(length(PassFiles), " multi-read .fast5 files specified as passed")
-
   }
 
-  if (is.na(DataFail)) {
-    FailFilesLength<-0
+  if(is.null(DataFail)){## no DataFail folder provided
+    FailFilesLength <- 0
     message("No failed .fast5 files path specified")
-  }
-
-  else {
-
-    if (MultiRead==FALSE) {
-
-      FailFilesLength<-length(list.files(DataFail, recursive = TRUE, pattern=".fast5"))
+  }else{
+    if(!MultiRead){## no MultiRead
+      FailFilesLength <- length(list.files(DataFail, recursive = TRUE, pattern = ".fast5"))
       message(FailFilesLength, " .fast5 files specified as failed")
-    }
-
-    else {
-
-      library(rhdf5)
-
-      FailFilesLength<-0
-      FailFiles<-list.files(DataFail, recursive = TRUE, pattern=".fast5", full.names=TRUE)
+    }else{
+      library(rhdf5) # -> move outside!
+      #FailFilesLength <- 0 # why is this needed?
+      FailFiles <- list.files(DataFail, recursive = TRUE, pattern = ".fast5", full.names = TRUE)
       message(length(FailFiles), " multi-read .fast5 files specified as failed")
+      
+      ## Ordering of fail files
+      FailFilesOrdered <- FailFiles[order(as.numeric(gsub("[^0-9]+", "", FailFiles)))]
 
-
-      FailFilesOrdered<-FailFiles[order(as.numeric(gsub("[^0-9]+", "", FailFiles)))]
-
-      First<-FailFilesOrdered[1]
-      FileOpen<-H5Fopen(First)
-      howmany<-nrow(h5ls(FileOpen, recursive=FALSE, datasetinfo=FALSE))
+      ## open first fail file and determine number of rows
+      First <- FailFilesOrdered[1]
+      FileOpen <- H5Fopen(First)
+      nr.rows.first <- nrow(h5ls(FileOpen, recursive = FALSE, datasetinfo = FALSE))
       H5Fclose(FileOpen)
 
-      Last<-FailFilesOrdered[length(FailFilesOrdered)]
-      FileOpen<-H5Fopen(Last)
-      howmany_<--nrow(h5ls(FileOpen, recursive=FALSE, datasetinfo=FALSE))
+      ## open last fail file and determine number of rows (why negative?)
+      Last <- FailFilesOrdered[length(FailFilesOrdered)]
+      FileOpen <- H5Fopen(Last)
+      nr.rows.last <- -nrow(h5ls(FileOpen, recursive = FALSE, datasetinfo = FALSE))
       H5Fclose(FileOpen)
 
-      FailFilesLength<-(howmany*(length(FailFiles)-1) + howmany_)
-
+      ## guessing the total number of rows of all fail files?
+      ## Not sure why howmany_ is negative
+      FailFilesLength <- (nr.rows.first*(length(FailFiles)-1) + nr.rows.last)
     }
-
-
   }
   
-  if (is.na(DataSkip)) { #no data skip for multiline? 
-    SkipFilesLength<-0
+  if(is.null(DataSkip)) { #no data skip for multiline? 
+    SkipFilesLength <- 0
     message("No skipped .fast5 files path specified")
-  }
-
-  else {
-
-    if (MultiRead==FALSE) {
-
-      SkipFilesLength<-length(list.files(DataSkip, recursive = TRUE, pattern=".fast5"))
+  }else{
+    if(!MultiRead){
+      SkipFilesLength <- length(list.files(DataSkip, recursive = TRUE, pattern=".fast5"))
       message(SkipFilesLength, " .fast5 files specified as skipped")
-
-    }
-
-    else { ## don't think is needed
-
-      library(rhdf5)
-
-      SkipFilesLength<-0
-      SkipFiles<-list.files(DataSkip, recursive = TRUE, pattern=".fast5", full.names=TRUE)
+    }else{ ## don't think is needed
+      library(rhdf5) ## -> move outside
+      #SkipFilesLength <- 0
+      SkipFiles <- list.files(DataSkip, recursive = TRUE, pattern = ".fast5", full.names = TRUE)
       message(length(SkipFiles), " multi-read .fast5 files specified as skipped")
 
+      SkipFilesOrdered <- SkipFiles[order(as.numeric(gsub("[^0-9]+", "", SkipFiles)))]
 
-      SkipFilesOrdered<-SkipFiles[order(as.numeric(gsub("[^0-9]+", "", SkipFiles)))]
-
-      First<-SkipFilesOrdered[1]
-      FileOpen<-H5Fopen(First)
-      howmany<-nrow(h5ls(FileOpen, recursive=FALSE, datasetinfo=FALSE))
+      First <- SkipFilesOrdered[1]
+      FileOpen <- H5Fopen(First)
+      nr.rows.first <- nrow(h5ls(FileOpen, recursive = FALSE, datasetinfo = FALSE))
       H5Fclose(FileOpen)
 
-      Last<-SkipFilesOrdered[length(SkipFilesOrdered)]
-      FileOpen<-H5Fopen(Last)
-      howmany_<--nrow(h5ls(FileOpen, recursive=FALSE, datasetinfo=FALSE))
+      Last <- SkipFilesOrdered[length(SkipFilesOrdered)]
+      FileOpen <- H5Fopen(Last)
+      nr.rows.last <- -nrow(h5ls(FileOpen, recursive = FALSE, datasetinfo = FALSE))
       H5Fclose(FileOpen)
 
-      SkipFilesLength<-(howmany*(length(SkipFiles)-1) + howmany_)
-
+      SkipFilesLength <- (nr.rows.first*(length(SkipFiles)-1) + nr.rows.last)
     }
-
   }
 
-  Label<-as.character(Label)
+  ## make sure that the user specifies a character vector of length 1 as Label
+  stopifnot(is.character(Label))
+  stopifnot(length(Label) == 1)
   
-  List<-list(PassFiles,FailFilesLength,SkipFilesLength,Label,MultiRead)
-
+  List <- list(PassFiles, FailFilesLength, SkipFilesLength, Label, MultiRead)
   message("Done")  
 
   return(List)
-
 }
