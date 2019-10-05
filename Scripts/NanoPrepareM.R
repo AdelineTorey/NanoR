@@ -25,11 +25,15 @@
 
 NanoPrepareM <- function(DataPass, DataFail = NULL, DataSkip = NULL, Label, MultiRead = FALSE){#simple and fast way to store informations
   
+  ## make sure that the user specifies a character vector of length 1 as Label
+  stopifnot(is.character(Label))
+  stopifnot(length(Label) == 1)
+  
   ## List of files in folder provided by DataPass
   PassFiles <- list.files(DataPass, full.names = TRUE, recursive = TRUE, pattern = ".fast5")
   
   ## Print message with the number of files in the DataPass folder
-  if(MultiRead == FALSE){
+  if(!MultiRead){
     message(length(PassFiles), " .fast5 files specified as passed")
   }else{
     message(length(PassFiles), " multi-read .fast5 files specified as passed")
@@ -98,10 +102,6 @@ NanoPrepareM <- function(DataPass, DataFail = NULL, DataSkip = NULL, Label, Mult
     }
   }
 
-  ## make sure that the user specifies a character vector of length 1 as Label
-  stopifnot(is.character(Label))
-  stopifnot(length(Label) == 1)
-  
   List <- list(PassFiles, FailFilesLength, SkipFilesLength, Label, MultiRead)
   message("Done")  
 
