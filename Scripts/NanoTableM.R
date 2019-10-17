@@ -32,30 +32,32 @@ NanoTableM<-function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
 
   TableInDirectory <- list.files(Directory,pattern="metadata.txt")
 
+  ## check if directory already exists
   if(length(TableInDirectory) != 0) {
-
     stop("Cannot use a directory that already contains other results")
-  
   }
   
   ##### FUNCTIONS ######
   
+  ## read data in a HDF5 file in a specified path
   Read_DataSet <- function(File, PathGroup) { 
-    h5errorHandling(type="suppress")
-    Data1 <- H5Dopen(File, PathGroup) 
-    Data2 <- H5Dread(Data1)
-    H5Dclose(Data1)
-    return(Data2) 
+    h5errorHandling(type="suppress") ## completely suppress HDF5 errors
+    Data1 <- H5Dopen(File, PathGroup) ## open HDF5 file in path
+    Data2 <- H5Dread(Data1) ## read data in opened file
+    H5Dclose(Data1) ## close open file
+    return(Data2) ## return read data
   }
   
+  ## read attributes in a HDF5 file in a specified path
   Read_Attributes <- function(PathGroup, Attribute) { 
     h5errorHandling(type="suppress")
-    Data1 <- H5Aopen(PathGroup, Attribute)
-    Data2 <- H5Aread(Data1)
-    H5Aclose(Data1)
-    return(Data2) 
+    Data1 <- H5Aopen(PathGroup, Attribute) ## open attributes of HDF5 file in path
+    Data2 <- H5Aread(Data1) ## read attributes in opened file
+    H5Aclose(Data1) ## close opened file
+    return(Data2) ## return read attributes
   } 
   
+  ## create vector Table containing 7 columns; return Table
   HDF5_File_Parsing_Table_With_GC <- function(i,File) {  ## work for R9.4 and R9.5
     
     h5errorHandling(type="suppress")
@@ -63,6 +65,7 @@ NanoTableM<-function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
     
     File <- H5Fopen(File[i])
     
+    ## read fastq data; check for other functions?
     Group1 <- "/Analyses/Basecall_1D_000/BaseCalled_template/Fastq"
     Try <- try(Read_DataSet(File,Group1), silent=TRUE) #exclude non-basecalled .fast5 reads (will be counted as failed by NanoStats)
     if (inherits(Try,"try-error")) {
@@ -76,12 +79,14 @@ NanoTableM<-function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
       #Fastq<-s2c(Sequence_Fastq)
       Table['GC_Content'] <- sum(gregexpr('[GgCc]', Sequence_Fastq)[[1]] > 0)/nchar(Sequence_Fastq)
       
+      ## read channel id from globalkey and input into Table - repeated several times
       Group2 <- "/UniqueGlobalKey/channel_id"
       Chann_File <- H5Gopen(File,Group2)
       Table['Channel'] <- Read_Attributes(Chann_File, "channel_number")
       #Sampling <- as.numeric(Read_Attributes(Chann_File,"sampling_rate")) if this will change, uncomment
       H5Gclose(Chann_File)
       
+      ## read qscore and length from summary and input into Table - repeated several times
       Group3 <- "/Analyses/Basecall_1D_000/Summary/basecall_1d_template"
       Score_Length <- H5Gopen(File, Group3)
       Table['Qscore'] <- Read_Attributes(Score_Length, "mean_qscore")
@@ -103,12 +108,14 @@ NanoTableM<-function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
         #Table['Unix_Time']<-"Unix_Time"
       #}
       
+      ## read raw/reads - repeated several times
       Group5 <- "/Raw/Reads"
       Read_Mux <- H5Gopen(File,Group5)
-      Template <- h5ls(Read_Mux, recursive=FALSE, datasetinfo=FALSE)
+      Template <- h5ls(Read_Mux, recursive=FALSE, datasetinfo=FALSE) ## list content of raw/reads
       H5Gclose(Read_Mux)
-      Read_Path <- paste0("/Raw/Reads/", Template$name)
+      Read_Path <- paste0("/Raw/Reads/", Template$name) ## convert to character and concatenate - not sure why
       
+      ## input mux and read_id from reads/raw into Table - repeated several times
       Group6 <- H5Gopen(File,Read_Path)
       
       Table['Mux'] <- Read_Attributes(Group6, "start_mux")
@@ -339,16 +346,17 @@ NanoTableM<-function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
     
     else {
       
-      
+      ## input GC content into Table
       Table['GC_Content'] <- 'GC_Content'
       
+      ## read channel id from globalkey and input into Table
       Group2 <- "/UniqueGlobalKey/channel_id"
       Chann_File <- H5Gopen(File, Group2)
       Table['Channel'] <- Read_Attributes(Chann_File, "channel_number")
       #Sampling <- as.numeric(Read_Attributes(Chann_File,"sampling_rate"))
       H5Gclose(Chann_File)
 
-
+      ## read qscore and length from summary and input into Table
       Group3 <- "/Analyses/Basecall_1D_000/Summary/basecall_1d_template"
       Score_Length <- H5Gopen(File, Group3)
       Table['Qscore'] <- Read_Attributes(Score_Length, "mean_qscore")
