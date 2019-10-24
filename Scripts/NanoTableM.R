@@ -363,21 +363,6 @@ NanoTableM<-function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
       Table['Length'] <- Read_Attributes(Score_Length, "sequence_length")
       H5Gclose(Score_Length)
       
-      #Group4<-"/Analyses/Basecall_1D_000/" ###No more used as sometimes it can have months in english word instead of numbers
-      #Time<-H5Gopen(File,Group4)
-      #if (H5Aexists(Time,"time_stamp")) {
-        #Date<-Read_Attributes(Time,"time_stamp")
-        #H5Gclose(Time)
-        #Y_M_D<-substr(Date,1,10)
-        #H_M_S<-substr(Date,12,19)
-        #Time_Vector<-paste(c(Y_M_D,H_M_S), collapse=" ")
-        #Table['Unix_Time']<-as.numeric(as.POSIXct(strptime(Time_Vector, "%Y-%m-%d %H:%M:%S")))
-      #}
-      #else {
-        #H5Gclose(Time)
-        #Table['Unix_Time']<-"Unix_Time"
-      #}
-      
       Group5 <- "/Raw/Reads"
       Read_Mux <- H5Gopen(File, Group5)
       Template <- h5ls(Read_Mux, recursive=FALSE, datasetinfo=FALSE)
