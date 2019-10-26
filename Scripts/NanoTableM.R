@@ -18,45 +18,30 @@
 #' # Calculate GC content
 #' Table<-NanoTableM(List,DataOut,Cores=6, GCC=TRUE) 
 
+## Add to description file!
+library(parallel)
+library(rhdf5)
+
+## Small helper function, will not be exported
+Read_DataSet <- function(File, PathGroup) { 
+  h5errorHandling(type="suppress") ## completely suppress HDF5 errors
+  Data1 <- H5Dopen(File, PathGroup) ## open HDF5 file in path
+  Data2 <- H5Dread(Data1) ## read data in opened file
+  H5Dclose(Data1) ## close open file
+  return(Data2) ## return read data
+}
+  
+## Small helper function, will not be exported
+## read attributes in a HDF5 file in a specified path
+Read_Attributes <- function(PathGroup, Attribute) { 
+  h5errorHandling(type="suppress")
+  Data1 <- H5Aopen(PathGroup, Attribute) ## open attributes of HDF5 file in path
+  Data2 <- H5Aread(Data1) ## read attributes in opened file
+  H5Aclose(Data1) ## close opened file
+  return(Data2) ## return read attributes
+} 
 
 
-NanoTableM<-function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
-  
-  library(parallel)
-  library(rhdf5)
-  #library(seqinr) #no more required
-  
-  label <- as.character(NanoMList[[4]])
-  Directory <- file.path(DataOut, label)
-  dir.create(Directory, showWarnings = FALSE, recursive=TRUE)
-
-  TableInDirectory <- list.files(Directory,pattern="metadata.txt")
-
-  ## check if directory already exists
-  if(length(TableInDirectory) != 0) {
-    stop("Cannot use a directory that already contains other results")
-  }
-  
-  ##### FUNCTIONS ######
-  
-  ## read data in a HDF5 file in a specified path
-  Read_DataSet <- function(File, PathGroup) { 
-    h5errorHandling(type="suppress") ## completely suppress HDF5 errors
-    Data1 <- H5Dopen(File, PathGroup) ## open HDF5 file in path
-    Data2 <- H5Dread(Data1) ## read data in opened file
-    H5Dclose(Data1) ## close open file
-    return(Data2) ## return read data
-  }
-  
-  ## read attributes in a HDF5 file in a specified path
-  Read_Attributes <- function(PathGroup, Attribute) { 
-    h5errorHandling(type="suppress")
-    Data1 <- H5Aopen(PathGroup, Attribute) ## open attributes of HDF5 file in path
-    Data2 <- H5Aread(Data1) ## read attributes in opened file
-    H5Aclose(Data1) ## close opened file
-    return(Data2) ## return read attributes
-  } 
-  
   ## create vector Table containing 7 columns; return Table
   HDF5_File_Parsing_Table_With_GC <- function(i,File) {  ## work for R9.4 and R9.5
     
@@ -578,119 +563,78 @@ NanoTableM<-function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
   }
 
 
-  #### PROCESS #####
-  
-  PassFiles <- NanoMList[[1]] #need to re-assign to another value
 
+NanoTableM <- function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
+  label <- as.character(NanoMList[[4]])
+  Directory <- file.path(DataOut, label)
+  dir.create(Directory, showWarnings = FALSE, recursive=TRUE)
+
+  TableInDirectory <- list.files(Directory,pattern="metadata.txt")
+
+  ## check if directory already exists
+  if(length(TableInDirectory) != 0) {
+    stop("Cannot use a directory that already contains other results")
+  }
+  
+  #### PROCESS #####
+  PassFiles <- NanoMList[[1]] #need to re-assign to another value
   Multi <- NanoMList[[5]]
   
   ### CALCULATIING ###
-
-  if (Multi == FALSE) { #classic behaviour, no multi-line .fast5
-
-  
-    if (GCC == TRUE) {
-
+  if(!Multi){ #classic behaviour, no multi-line .fast5
+    if(GCC){
       message("Extracting metadata and calculating GC content from .fast5 files...")
-
-      if (Cores > 1) {
-
+      if(Cores > 1){
         cl <- makeCluster(as.numeric(Cores)) 
         clusterExport(cl, c("HDF5_File_Parsing_Table_With_GC","PassFiles","Read_DataSet","Read_Attributes"),envir=environment())
         clusterEvalQ(cl,library(rhdf5))
         List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing_Table_With_GC,PassFiles)
         stopCluster(cl)
-      
-      }
-
-      else {
-
+      }else{
         List <- lapply(PassFiles, HDF5_File_Parsing_Table_With_GC_SC)
-
       }
-    
-    }
-
-    else {
-
+    }else{
       message("Extracting metadata from .fast5 files...")
-
-
-      if (Cores >1) {
-
+      if(Cores > 1){
         cl <- makeCluster(as.numeric(Cores)) 
         clusterExport(cl, c("HDF5_File_Parsing_Table_Without_GC","PassFiles","Read_Attributes"),envir=environment())
         clusterEvalQ(cl,library(rhdf5))
         List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing_Table_Without_GC,PassFiles)
         stopCluster(cl)
-
-      }
-
-      else {
-
+      }else{
         List <- lapply(PassFiles, HDF5_File_Parsing_Table_Without_GC_SC)
-
       }
-
     }
-
-  }
-
-
-  else { ## multiline.fast5
-
-
-    if (GCC == TRUE) {
-
+  }else{ ## multiline.fast5
+    if(GCC){
       message("Extracting metadata and calculating GC content from multi-read .fast5 files...")
-
-      if (Cores > 1) {
-
+      if(Cores > 1){
         cl <- makeCluster(as.numeric(Cores)) 
         clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment())
         clusterEvalQ(cl,library(rhdf5))
-        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing,PassFiles)
+        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing, PassFiles)
         stopCluster(cl)
-        
-      }
-
-      else {
-
+      }else{
         List <- lapply(PassFiles, HDF5_File_Parsing_Table_With_GC_Multiline_SC)
-
       }
-    
-    }
-
-    else {
-
+    }else{
       message("Extracting metadata from multi-read .fast5 files...")
-
-
-      if (Cores >1) {
-
+      if(Cores > 1){
         cl <- makeCluster(as.numeric(Cores)) 
         clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_Attributes", "Read_DataSet"),envir=environment())
         clusterEvalQ(cl, library(rhdf5))
-        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing,PassFiles)
+        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing, PassFiles)
         stopCluster(cl)
-
-      }
-
-      else {
-
+      }else{
         List <- lapply(PassFiles, HDF5_File_Parsing_Table_Without_GC_Multiline_SC)
-
       }
-
     }
-
-  }    
-
+  }
+  
   Table_Tot <- do.call(rbind,List)
   colnames(Table_Tot) <- c("Read Id", "Channel Number", "Mux Number", "Unix Time", "Length of Read", "Quality", "GC Content")
   write.table(Table_Tot, file.path(Directory, "metadata.txt"), col.names=T, row.names=F, quote=F, sep="\t")
   message("Done")
+  
   return(Table_Tot)
-
 }
