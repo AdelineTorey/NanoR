@@ -350,7 +350,7 @@ Read_Attributes <- function(PathGroup, Attribute) {
   ###################### NEW FUNCTIONS FOR MULTI-READ .fast5 ##############################
 
   ## combined multiline multi-core (with and without gc)
-  HDF5_File_Parsing <- function(i, File, samplingRate = 4000){
+  HDF5_File_Parsing <- function(i, File, GCC = TRUE, samplingRate = 4000){
     h5errorHandling(type="suppress")
     File <- H5Fopen(File[i])
     idtab <- h5ls(File, recursive=FALSE, datasetinfo=FALSE)[2]
@@ -564,7 +564,7 @@ Read_Attributes <- function(PathGroup, Attribute) {
 
 
 
-NanoTableM <- function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
+NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to FALSE
   label <- as.character(NanoMList[[4]])
   Directory <- file.path(DataOut, label)
   dir.create(Directory, showWarnings = FALSE, recursive=TRUE)
@@ -612,7 +612,7 @@ NanoTableM <- function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
         cl <- makeCluster(as.numeric(Cores)) 
         clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment())
         clusterEvalQ(cl,library(rhdf5))
-        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing, PassFiles)
+        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing, File = PassFiles, GCC = TRUE)
         stopCluster(cl)
       }else{
         List <- lapply(PassFiles, HDF5_File_Parsing_Table_With_GC_Multiline_SC)
@@ -623,7 +623,7 @@ NanoTableM <- function(NanoMList,DataOut,Cores=1,GCC=FALSE) { #switched to FALSE
         cl <- makeCluster(as.numeric(Cores)) 
         clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_Attributes", "Read_DataSet"),envir=environment())
         clusterEvalQ(cl, library(rhdf5))
-        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing, PassFiles)
+        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing, File = PassFiles, GCC = FALSE)
         stopCluster(cl)
       }else{
         List <- lapply(PassFiles, HDF5_File_Parsing_Table_Without_GC_Multiline_SC)
