@@ -609,10 +609,10 @@ NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to
     if(GCC){
       message("Extracting metadata and calculating GC content from multi-read .fast5 files...")
       if(Cores > 1){
-        cl <- makeCluster(as.numeric(Cores)) 
-        clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment())
-        clusterEvalQ(cl,library(rhdf5))
-        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing, File = PassFiles, GCC = TRUE)
+        cl <- makeCluster(as.numeric(Cores)) ## create clusters of nCores running in parallel
+        clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment()) ## assigns values corresponding to variables and exports to global environment
+        clusterEvalQ(cl,library(rhdf5)) ## evaluate rhdf5 on each cluster? not sure why whole package is used
+        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing, File = PassFiles, GCC = TRUE) ## apply function HDF5_File_Parsing to all files in PassFiles in parallel
         stopCluster(cl)
       }else{
         List <- lapply(PassFiles, HDF5_File_Parsing_Table_With_GC_Multiline_SC)
