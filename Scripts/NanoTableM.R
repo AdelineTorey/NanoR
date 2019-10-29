@@ -350,9 +350,9 @@ Read_Attributes <- function(PathGroup, Attribute) {
   ###################### NEW FUNCTIONS FOR MULTI-READ .fast5 ##############################
 
   ## combined multiline multi-core (with and without gc)
-  HDF5_File_Parsing <- function(i, File, GCC = TRUE, samplingRate = 4000){
+  HDF5_File_Parsing <- function(File, GCC = TRUE, samplingRate = 4000){
     h5errorHandling(type="suppress")
-    File <- H5Fopen(File[i])
+    File <- H5Fopen(File)
     idtab <- h5ls(File, recursive=FALSE, datasetinfo=FALSE)[2]
     Table <- c(Read_Id="Read_Id",Channel="Channel",Mux="Mux",Unix_Time="Unix_Time",Length="Length",Qscore="Qscore",GC_Content="GC_Content")
     List <- rep(list(Table),nrow(idtab))
@@ -612,7 +612,7 @@ NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to
         cl <- makeCluster(as.numeric(Cores)) ## create clusters of nCores running in parallel
         clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment()) ## assigns values corresponding to variables and exports to global environment
         clusterEvalQ(cl,library(rhdf5)) ## evaluate rhdf5 on each cluster? not sure why whole package is used
-        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing, File = PassFiles, GCC = TRUE) ## apply function HDF5_File_Parsing to all files in PassFiles in parallel
+        List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = TRUE) ## apply function HDF5_File_Parsing to all files in PassFiles in parallel
         stopCluster(cl)
       }else{
         List <- lapply(PassFiles, HDF5_File_Parsing_Table_With_GC_Multiline_SC)
@@ -623,7 +623,7 @@ NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to
         cl <- makeCluster(as.numeric(Cores)) 
         clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_Attributes", "Read_DataSet"),envir=environment())
         clusterEvalQ(cl, library(rhdf5))
-        List <- parLapply(cl, c(1:length(PassFiles)), HDF5_File_Parsing, File = PassFiles, GCC = FALSE)
+        List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = FALSE)
         stopCluster(cl)
       }else{
         List <- lapply(PassFiles, HDF5_File_Parsing_Table_Without_GC_Multiline_SC)
