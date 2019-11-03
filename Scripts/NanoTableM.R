@@ -620,9 +620,9 @@ NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to
       stopCluster(cl)
     }else{
       if(GCC){
-        List <- lapply(PassFiles, HDF5_File_Parsing_Table_With_GC_Multiline_SC)
+        List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC)
       }else{
-        List <- lapply(PassFiles, HDF5_File_Parsing_Table_Without_GC_Multiline_SC)
+        List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC)
       }
     }
   }
