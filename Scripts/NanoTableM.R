@@ -471,11 +471,7 @@ NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to
       List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = GCC) ## apply function HDF5_File_Parsing to all files in PassFiles in parallel
       stopCluster(cl)
     }else{
-      if(GCC){
-        List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC)
-      }else{
-        List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC)
-      }
+      List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC)
     }
   }
   
