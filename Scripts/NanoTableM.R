@@ -436,26 +436,18 @@ NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to
   if(!Multi){ #classic behaviour, no multi-line .fast5
     if(GCC){
       message("Extracting metadata and calculating GC content from .fast5 files...")
-      if(Cores > 1){
-        cl <- makeCluster(as.numeric(Cores)) 
-        clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment())
-        clusterEvalQ(cl,library(rhdf5))
-        List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = GCC)
-        stopCluster(cl)
-      }else{
-        List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC)
-      }
     }else{
       message("Extracting metadata from .fast5 files...")
-      if(Cores > 1){
-        cl <- makeCluster(as.numeric(Cores)) 
-        clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_Attributes"),envir=environment())
-        clusterEvalQ(cl,library(rhdf5))
-        List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = GCC)
-        stopCluster(cl)
-      }else{
-        List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC)
-      }
+    }
+    
+    if(Cores > 1){
+      cl <- makeCluster(as.numeric(Cores)) 
+      clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment())
+      clusterEvalQ(cl,library(rhdf5))
+      List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = GCC)
+      stopCluster(cl)
+    }else{
+      List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC)
     }
   }else{ ## multiline.fast5
     if(GCC){
