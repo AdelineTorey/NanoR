@@ -46,7 +46,12 @@ Read_Attributes <- function(PathGroup, Attribute) {
   ###################### NEW FUNCTIONS FOR MULTI-READ .fast5 ##############################
 
   ## combined multiline multi-core (with and without gc)
-  HDF5_File_Parsing <- function(File, GCC = TRUE, samplingRate = 4000){
+  HDF5_File_Parsing <- function(File, GCC = TRUE, samplingRate = 4000, Multi = TRUE){
+    
+    if(!Multi){
+      
+      
+    }else{
     h5errorHandling(type="suppress")
     File <- H5Fopen(File)
     idtab <- h5ls(File, recursive=FALSE, datasetinfo=FALSE)[2]
@@ -70,6 +75,7 @@ Read_Attributes <- function(PathGroup, Attribute) {
           }else{
             List[[l]]['GC_Content']<-'GC_Content'
           }
+          
           H5Gclose(GroupAnalyses)
           
           GroupQuality <- H5Gopen(File, paste0(idtab[l,], '/Analyses/Basecall_1D_000/Summary/basecall_1d_template'))
@@ -104,12 +110,20 @@ Read_Attributes <- function(PathGroup, Attribute) {
           H5Gclose(GroupStartTime)
         }
       }
+      }
     }
     
     H5Fclose(File)
     Table <- do.call(rbind,List)
     return(Table)
-  }
+  }  
+ }
+    
+    
+    
+    
+    
+    
   
 
 NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to FALSE
@@ -156,10 +170,10 @@ NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to
       cl <- makeCluster(as.numeric(Cores)) ## create clusters of nCores running in parallel
       clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment()) ## assigns values corresponding to variables and exports to global environment
       clusterEvalQ(cl,library(rhdf5)) ## evaluate rhdf5 on each cluster? not sure why whole package is used
-      List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = GCC) ## apply function HDF5_File_Parsing to all files in PassFiles in parallel
+      List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = GCC, Multi = Multi) ## apply function HDF5_File_Parsing to all files in PassFiles in parallel
       stopCluster(cl)
     }else{
-      List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC)
+      List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC, Multi = Multi)
     }
   }
   
