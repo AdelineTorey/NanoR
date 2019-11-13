@@ -88,7 +88,7 @@ Read_Attributes <- function(PathGroup, Attribute) {
         Table['Read_Id'] <- Read_Attributes(Group6,"read_id")
         Start <- Read_Attributes(Group6,"start_time")
         
-        AlternativeStart <- floor(Start/4000) ##actual sampling rate
+        AlternativeStart <- floor(Start/samplingRate) ##actual sampling rate
         H5Gclose(Group6)
         
         Group4.2 <- "/UniqueGlobalKey/tracking_id"
