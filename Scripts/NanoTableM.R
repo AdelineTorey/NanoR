@@ -108,16 +108,15 @@ Read_Attributes <- function(PathGroup, Attribute) {
           }
           
           H5Gclose(GroupStartTime)
+          }
         }
-      }
       }
     }
     
     H5Fclose(File)
     Table <- do.call(rbind,List)
     return(Table)
-  }  
- }
+  }
     
     
     
