@@ -41,72 +41,67 @@ Read_Attributes <- function(PathGroup, Attribute) {
   return(Data2) ## return read attributes
 } 
 
-
-
-  ###################### NEW FUNCTIONS FOR MULTI-READ .fast5 ##############################
-
-  ## combined multiline multi-core (with and without gc)
-  HDF5_File_Parsing <- function(File, GCC = TRUE, samplingRate = 4000, Multi = TRUE){
+###################### NEW FUNCTIONS FOR MULTI-READ .fast5 ##############################
+## combined multiline multi-core (with and without gc)
+HDF5_File_Parsing <- function(File, GCC = TRUE, samplingRate = 4000, Multi = TRUE){
+  if(!Multi){
+    h5errorHandling(type="suppress")
+    Table <- c(Read_Id="Read_Id",Channel="Channel",Mux="Mux",Unix_Time="Unix_Time",Length="Length",Qscore="Qscore",GC_Content="GC_Content")
+    File <- H5Fopen(File)
     
-    if(!Multi){
-      h5errorHandling(type="suppress")
-      Table <- c(Read_Id="Read_Id",Channel="Channel",Mux="Mux",Unix_Time="Unix_Time",Length="Length",Qscore="Qscore",GC_Content="GC_Content")
-      File <- H5Fopen(File)
-      
-      Group1 <- "/Analyses/Basecall_1D_000/BaseCalled_template/Fastq"
-      Try <- try(Read_DataSet(File,Group1), silent=TRUE) #exclude non-basecalled .fast5 reads (will be counted as failed by NanoStats)
-      
-        if(inherits(Try,"try-error")){
-        return(Table)
-        }else if (GCC){
-          Sequence_Fastq <- unlist(strsplit(Try,"\n"))[2]
-          Table['GC_Content'] <- sum(gregexpr('[GgCc]',Sequence_Fastq)[[1]] > 0)/nchar(Sequence_Fastq)
-          }else{
-          Table['GC_Content'] <- 'GC_Content'
-          }
-      
-        Group2 <- "/UniqueGlobalKey/channel_id"
-        Chann_File <- H5Gopen(File,Group2)
-        Table['Channel'] <- Read_Attributes(Chann_File,"channel_number")
-        H5Gclose(Chann_File)
-        
-        Group3 <- "/Analyses/Basecall_1D_000/Summary/basecall_1d_template"
-        Score_Length <- H5Gopen(File,Group3)
-        Table['Qscore'] <- Read_Attributes(Score_Length,"mean_qscore")
-        Table['Length'] <- Read_Attributes(Score_Length,"sequence_length")
-        H5Gclose(Score_Length)
-        
-        Group5 <- "/Raw/Reads"
-        Read_Mux <- H5Gopen(File,Group5)
-        Template <- h5ls(Read_Mux,recursive=FALSE,datasetinfo=FALSE)
-        H5Gclose(Read_Mux)
-        Read_Path <- paste0("/Raw/Reads/",Template$name)
-        
-        Group6 <- H5Gopen(File,Read_Path)
-        
-        Table['Mux'] <- Read_Attributes(Group6,"start_mux")
-        Table['Read_Id'] <- Read_Attributes(Group6,"read_id")
-        Start <- Read_Attributes(Group6,"start_time")
-        
-        AlternativeStart <- floor(Start/samplingRate) ##actual sampling rate
-        H5Gclose(Group6)
-        
-        Group4.2 <- "/UniqueGlobalKey/tracking_id"
-        Time2 <- H5Gopen(File,Group4.2)
-        DateUnix2 <- Read_Attributes(Time2,"exp_start_time")
-        H5Gclose(Time2)
-        if (length(unlist(strsplit(DateUnix2,"T")))==2) {### avoid problems with UNIX exp start times found on EGA samples
-          Y_M_D <- substr(DateUnix2,1,10)
-          H_M_S <- substr(DateUnix2,12,19)
-          Time_Vector <- paste(c(Y_M_D,H_M_S), collapse=" ")
-          Table['Unix_Time'] <- as.numeric(as.POSIXct(strptime(Time_Vector, "%Y-%m-%d %H:%M:%S")))+AlternativeStart
-        }else{
-          Table['Unix_Time'] <- (as.numeric(AlternativeStart)+as.numeric(DateUnix2))
-        }
-        H5Fclose(File)
-        return(Table)
-        
+    Group1 <- "/Analyses/Basecall_1D_000/BaseCalled_template/Fastq"
+    Try <- try(Read_DataSet(File,Group1), silent=TRUE) #exclude non-basecalled .fast5 reads (will be counted as failed by NanoStats)
+    
+    if(inherits(Try,"try-error")){
+      return(Table)
+    }else if (GCC){
+      Sequence_Fastq <- unlist(strsplit(Try,"\n"))[2]
+      Table['GC_Content'] <- sum(gregexpr('[GgCc]',Sequence_Fastq)[[1]] > 0)/nchar(Sequence_Fastq)
     }else{
+       Table['GC_Content'] <- 'GC_Content'
+    }
+      
+    Group2 <- "/UniqueGlobalKey/channel_id"
+    Chann_File <- H5Gopen(File,Group2)
+    Table['Channel'] <- Read_Attributes(Chann_File,"channel_number")
+    H5Gclose(Chann_File)
+        
+    Group3 <- "/Analyses/Basecall_1D_000/Summary/basecall_1d_template"
+    Score_Length <- H5Gopen(File,Group3)
+    Table['Qscore'] <- Read_Attributes(Score_Length,"mean_qscore")
+    Table['Length'] <- Read_Attributes(Score_Length,"sequence_length")
+    H5Gclose(Score_Length)
+       
+    Group5 <- "/Raw/Reads"
+    Read_Mux <- H5Gopen(File,Group5)
+    Template <- h5ls(Read_Mux,recursive=FALSE,datasetinfo=FALSE)
+    H5Gclose(Read_Mux)
+    Read_Path <- paste0("/Raw/Reads/",Template$name)
+        
+    Group6 <- H5Gopen(File,Read_Path)
+        
+    Table['Mux'] <- Read_Attributes(Group6,"start_mux")
+    Table['Read_Id'] <- Read_Attributes(Group6,"read_id")
+    Start <- Read_Attributes(Group6,"start_time")
+        
+    AlternativeStart <- floor(Start/samplingRate) ##actual sampling rate
+    H5Gclose(Group6)
+        
+    Group4.2 <- "/UniqueGlobalKey/tracking_id"
+    Time2 <- H5Gopen(File,Group4.2)
+    DateUnix2 <- Read_Attributes(Time2,"exp_start_time")
+    H5Gclose(Time2)
+    if (length(unlist(strsplit(DateUnix2,"T")))==2) {### avoid problems with UNIX exp start times found on EGA samples
+      Y_M_D <- substr(DateUnix2,1,10)
+      H_M_S <- substr(DateUnix2,12,19)
+      Time_Vector <- paste(c(Y_M_D,H_M_S), collapse=" ")
+      Table['Unix_Time'] <- as.numeric(as.POSIXct(strptime(Time_Vector, "%Y-%m-%d %H:%M:%S")))+AlternativeStart
+    }else{
+      Table['Unix_Time'] <- (as.numeric(AlternativeStart)+as.numeric(DateUnix2))
+    }
+    H5Fclose(File)
+    return(Table)    
+}else{
     h5errorHandling(type="suppress")
     File <- H5Fopen(File)
     idtab <- h5ls(File, recursive=FALSE, datasetinfo=FALSE)[2]
@@ -131,47 +126,47 @@ Read_Attributes <- function(PathGroup, Attribute) {
             List[[l]]['GC_Content']<-'GC_Content'
           }
           
-          H5Gclose(GroupAnalyses)
+        H5Gclose(GroupAnalyses)
           
-          GroupQuality <- H5Gopen(File, paste0(idtab[l,], '/Analyses/Basecall_1D_000/Summary/basecall_1d_template'))
-          List[[l]]['Qscore'] <- Read_Attributes(GroupQuality, 'mean_qscore')
-          List[[l]]['Length'] <- Read_Attributes(GroupQuality, 'sequence_length')
-          H5Gclose(GroupQuality)
+        GroupQuality <- H5Gopen(File, paste0(idtab[l,], '/Analyses/Basecall_1D_000/Summary/basecall_1d_template'))
+        List[[l]]['Qscore'] <- Read_Attributes(GroupQuality, 'mean_qscore')
+        List[[l]]['Length'] <- Read_Attributes(GroupQuality, 'sequence_length')
+        H5Gclose(GroupQuality)
           
-          GroupId <- H5Gopen(File, paste0(idtab[l,], '/Raw/'))
-          List[[l]]['Read_Id'] <- Read_Attributes(GroupId, 'read_id')
-          List[[l]]['Mux'] <- Read_Attributes(GroupId, 'start_mux')
-          Generation <- Read_Attributes(GroupId, 'start_time')
-          H5Gclose(GroupId)
+        GroupId <- H5Gopen(File, paste0(idtab[l,], '/Raw/'))
+        List[[l]]['Read_Id'] <- Read_Attributes(GroupId, 'read_id')
+        List[[l]]['Mux'] <- Read_Attributes(GroupId, 'start_mux')
+        Generation <- Read_Attributes(GroupId, 'start_time')
+        H5Gclose(GroupId)
           
-          GroupChannel <- H5Gopen(File,paste0(idtab[l,],'/channel_id/'))
-          List[[l]]['Channel'] <- Read_Attributes(GroupChannel, 'channel_number')
-          H5Gclose(GroupChannel)
+        GroupChannel <- H5Gopen(File,paste0(idtab[l,],'/channel_id/'))
+        List[[l]]['Channel'] <- Read_Attributes(GroupChannel, 'channel_number')
+        H5Gclose(GroupChannel)
           
-          GroupStartTime <- H5Gopen(File,paste0(idtab[l,],'/tracking_id/'))
+        GroupStartTime <- H5Gopen(File,paste0(idtab[l,],'/tracking_id/'))
           
-          Time <- Read_Attributes(GroupStartTime, 'exp_start_time')
-          AlternativeStart <- floor(Generation/samplingRate) ##actual sampling rate
+        Time <- Read_Attributes(GroupStartTime, 'exp_start_time')
+        AlternativeStart <- floor(Generation/samplingRate) ##actual sampling rate
           
-          if(length(unlist(strsplit(Time,"T"))) == 2) {### avoid problems with UNIX exp start times found on EGA samples
-            Y_M_D <- substr(Time,1,10)
-            H_M_S <- substr(Time,12,19)
-            Time_Vector <- paste(c(Y_M_D,H_M_S), collapse=" ")
-            List[[l]]['Unix_Time'] <- as.numeric(as.POSIXct(strptime(Time_Vector, "%Y-%m-%d %H:%M:%S")))+AlternativeStart
-          }else{
-            List[[l]]['Unix_Time'] <- as.numeric(AlternativeStart) + as.numeric(Time)
-          }
+        if(length(unlist(strsplit(Time,"T"))) == 2) {### avoid problems with UNIX exp start times found on EGA samples
+          Y_M_D <- substr(Time,1,10)
+          H_M_S <- substr(Time,12,19)
+          Time_Vector <- paste(c(Y_M_D,H_M_S), collapse=" ")
+          List[[l]]['Unix_Time'] <- as.numeric(as.POSIXct(strptime(Time_Vector, "%Y-%m-%d %H:%M:%S")))+AlternativeStart
+        }else{
+          List[[l]]['Unix_Time'] <- as.numeric(AlternativeStart) + as.numeric(Time)
+        }
           
-          H5Gclose(GroupStartTime)
-          }
+        H5Gclose(GroupStartTime)
         }
       }
     }
-    
-    H5Fclose(File)
-    Table <- do.call(rbind,List)
-    return(Table)
   }
+    
+  H5Fclose(File)
+  Table <- do.call(rbind,List)
+  return(Table)
+}
 
 NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to FALSE
   label <- as.character(NanoMList[[4]])
@@ -190,38 +185,20 @@ NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to
   Multi <- NanoMList[[5]]
   
   ### CALCULATIING ###
-  if(!Multi){ #classic behaviour, no multi-line .fast5
-    if(GCC){
-      message("Extracting metadata and calculating GC content from .fast5 files...")
-    }else{
-      message("Extracting metadata from .fast5 files...")
-    }
+  if(GCC){
+    message("Extracting metadata and calculating GC content from multi-read .fast5 files...")
+  }else{
+    message("Extracting metadata from multi-read .fast5 files...")
+  }
     
-    if(Cores > 1){
-      cl <- makeCluster(as.numeric(Cores)) 
-      clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment())
-      clusterEvalQ(cl,library(rhdf5))
-      List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = GCC, Multi = Multi)
-      stopCluster(cl)
-    }else{
-      List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC, Multi = Multi)
-    }
-  }else{ ## multiline.fast5
-    if(GCC){
-      message("Extracting metadata and calculating GC content from multi-read .fast5 files...")
-    }else{
-      message("Extracting metadata from multi-read .fast5 files...")
-    }
-    
-    if(Cores > 1){
-      cl <- makeCluster(as.numeric(Cores)) ## create clusters of nCores running in parallel
-      clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment()) ## assigns values corresponding to variables and exports to global environment
-      clusterEvalQ(cl,library(rhdf5)) ## evaluate rhdf5 on each cluster? not sure why whole package is used
-      List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = GCC, Multi = Multi) ## apply function HDF5_File_Parsing to all files in PassFiles in parallel
-      stopCluster(cl)
-    }else{
-      List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC, Multi = Multi)
-    }
+  if(Cores > 1){
+    cl <- makeCluster(as.numeric(Cores)) ## create clusters of nCores running in parallel
+    clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment()) ## assigns values corresponding to variables and exports to global environment
+    clusterEvalQ(cl,library(rhdf5)) ## evaluate rhdf5 on each cluster? not sure why whole package is used
+    List <- parLapply(cl, PassFiles, HDF5_File_Parsing, GCC = GCC, Multi = Multi) ## apply function HDF5_File_Parsing to all files in PassFiles in parallel
+    stopCluster(cl)
+  }else{
+    List <- lapply(PassFiles, HDF5_File_Parsing, GCC = GCC, Multi = Multi)
   }
   
   Table_Tot <- do.call(rbind,List)
