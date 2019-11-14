@@ -185,12 +185,15 @@ NanoTableM <- function(NanoMList, DataOut, Cores = 1,GCC = FALSE) { #switched to
   Multi <- NanoMList[[5]]
   
   ### CALCULATIING ###
-  if(GCC){
-    message("Extracting metadata and calculating GC content from multi-read .fast5 files...")
+  if(!Multi){
+    message("Extracting metadata from .fast5 files...")
   }else{
     message("Extracting metadata from multi-read .fast5 files...")
   }
-    
+  if(GCC){
+    message("Calculating GC content...")
+  }
+
   if(Cores > 1){
     cl <- makeCluster(as.numeric(Cores)) ## create clusters of nCores running in parallel
     clusterExport(cl, c("HDF5_File_Parsing","PassFiles","Read_DataSet","Read_Attributes"),envir=environment()) ## assigns values corresponding to variables and exports to global environment
