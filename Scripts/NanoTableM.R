@@ -44,10 +44,12 @@ Read_Attributes <- function(PathGroup, Attribute) {
 ###################### NEW FUNCTIONS FOR MULTI-READ .fast5 ##############################
 ## combined multiline multi-core (with and without gc)
 HDF5_File_Parsing <- function(File, GCC = TRUE, samplingRate = 4000, Multi = TRUE){
+  
+  h5errorHandling(type="suppress")
+  Table <- c(Read_Id="Read_Id",Channel="Channel",Mux="Mux",Unix_Time="Unix_Time",Length="Length",Qscore="Qscore",GC_Content="GC_Content")
+  File <- H5Fopen(File)
+  
   if(!Multi){
-    h5errorHandling(type="suppress")
-    Table <- c(Read_Id="Read_Id",Channel="Channel",Mux="Mux",Unix_Time="Unix_Time",Length="Length",Qscore="Qscore",GC_Content="GC_Content")
-    File <- H5Fopen(File)
     
     Group1 <- "/Analyses/Basecall_1D_000/BaseCalled_template/Fastq"
     Try <- try(Read_DataSet(File,Group1), silent=TRUE) #exclude non-basecalled .fast5 reads (will be counted as failed by NanoStats)
@@ -102,10 +104,9 @@ HDF5_File_Parsing <- function(File, GCC = TRUE, samplingRate = 4000, Multi = TRU
     H5Fclose(File)
     return(Table)    
 }else{
-    h5errorHandling(type="suppress")
-    File <- H5Fopen(File)
+    
     idtab <- h5ls(File, recursive=FALSE, datasetinfo=FALSE)[2]
-    Table <- c(Read_Id="Read_Id",Channel="Channel",Mux="Mux",Unix_Time="Unix_Time",Length="Length",Qscore="Qscore",GC_Content="GC_Content")
+    
     List <- rep(list(Table),nrow(idtab))
     for(l in 1:nrow(idtab)) {
       GroupAnalyses <- try(H5Gopen(File, paste0(idtab[l,], '/Analyses/Basecall_1D_000/BaseCalled_template')), 
