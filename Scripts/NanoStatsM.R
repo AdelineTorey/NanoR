@@ -38,16 +38,16 @@ NanoStatsM<-function(NanoMList,NanoMTable,DataOut, KeepGGObj=FALSE) {
   library(grid)
   library(gridExtra)
 
-  label<-as.character(NanoMList[[4]])
-  Directory<-file.path(DataOut, label)
+  label <- as.character(NanoMList[[4]])
+  Directory <- file.path(DataOut, label)
 
-  TableInDirectory<-list.files(Directory,pattern="metadata.txt")
+  TableInDirectory <- list.files(Directory, pattern="metadata.txt")
 
   if(length(TableInDirectory) == 0) {
     stop("Use the same directory specified for NanoTableM function")
   }
 
-  CumulativeInDirectory<-list.files(Directory,pattern=("Yield.pdf"))
+  CumulativeInDirectory <- list.files(Directory,pattern=("Yield.pdf"))
 
   if(length(CumulativeInDirectory) != 0) {
     stop("Can't use a directory that already contains previous results")
@@ -84,42 +84,42 @@ NanoStatsM<-function(NanoMList,NanoMTable,DataOut, KeepGGObj=FALSE) {
 #  setwd(Directory)
   options(scipen=9999)
 
-  FilesAnalyzed<-which(as.character(NanoMTable[,1]) != "Read_Id")
-  Length_Not_Analyzed<-length(which(as.character(NanoMTable[,1]) == "Read_Id"))
-  NanoTable<-NanoMTable[FilesAnalyzed,]
-  Really_Pass_File<-which(as.numeric(NanoTable[,6]) >= 7)
-  Fail_File_Length<-length(which(as.numeric(NanoTable[,6]) < 7))
-  NanoTable<-NanoTable[Really_Pass_File,]
-  List.Files.HDF5_Fail_Length<-as.numeric(NanoMList[[2]])+Length_Not_Analyzed+Fail_File_Length
-  List.Files.HDF5_Pass.length<-nrow(NanoTable)
-  List.Files.HDF5_Skip_Length<-as.numeric(NanoMList[[3]])
+  FilesAnalyzed <- which(as.character(NanoMTable[,1]) != "Read_Id") ## subset data which is not "Read_Id" in column 1
+  Length_Not_Analyzed <- length(which(as.character(NanoMTable[,1]) == "Read_Id")) ## length of objects which is "Read_Id" in column 1 ## is it to exclude the header?
+  NanoTable <- NanoMTable[FilesAnalyzed,] ##
+  Really_Pass_File <- which(as.numeric(NanoTable[,6]) >= 7) ## subset Quality score same as or above 7
+  Fail_File_Length <- length(which(as.numeric(NanoTable[,6]) < 7)) ## length of objects with Quality score below 7
+  NanoTable <- NanoTable[Really_Pass_File,]
+  List.Files.HDF5_Fail_Length <- as.numeric(NanoMList[[2]]) + Length_Not_Analyzed + Fail_File_Length
+  List.Files.HDF5_Pass.length <- nrow(NanoTable)
+  List.Files.HDF5_Skip_Length <- as.numeric(NanoMList[[3]])
 
   write.table(NanoTable, file.path(Directory, "metadata.fltrd.txt"), col.names=T, row.names=F, quote=F, sep="\t") #overwrite previous
 
-  Table_HDF5_Def<-NanoTable[,1:6]
-  Time_2<-as.numeric(Table_HDF5_Def[,4])
-  Run_Duration<-round(as.numeric(difftime(as.POSIXct(max(Time_2),origin="1/1/1970"), as.POSIXct(min(Time_2), origin="1/1/1970"), units="hours")))
+  Table_HDF5_Def <- NanoTable[,1:6] ## subset columns 1-6
+  Time_2 <- as.numeric(Table_HDF5_Def[,4])
+  Run_Duration <- round(as.numeric(difftime(as.POSIXct(max(Time_2),origin="1/1/1970"), as.POSIXct(min(Time_2), origin="1/1/1970"), units="hours")))
   Relative_Time <- scales::rescale(Time_2, to=c(0,Run_Duration))
   #Table_HDF5_Def<-cbind(Table_HDF5,Time_Rescaled)
 
   #colnames(Table_HDF5_Def)<-c("Read", "Channel Number", "Mux Number", "Unix Time", "Length of Read", "Quality", "Relative Experimental Time") #no need to rename cols
 
   #Relative_Time<-as.numeric(Table_HDF5_Def[,7])
-  Relative_Time_Per_Hours<-seq(from=min(round(Relative_Time)), to=max(round(Relative_Time)), by=0.5)
-  Template_Length<-as.numeric(Table_HDF5_Def[,5])
-  Quality_Score<-as.numeric(Table_HDF5_Def[,6])
+  Relative_Time_Per_Hours <- seq(from=min(round(Relative_Time)), to=max(round(Relative_Time)), by=0.5)
+  Template_Length <- as.numeric(Table_HDF5_Def[,5])
+  Quality_Score <- as.numeric(Table_HDF5_Def[,6]) ## subset Quality Score
 
 
   message("Analyzing...")
 
-  Reads_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Base_Pairs_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Max_Length_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Mean_Length_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Min_Length_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Min_Quality_Score_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Mean_Quality_Score_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Max_Quality_Score_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
+  Reads_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
+  Base_Pairs_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
+  Max_Length_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
+  Mean_Length_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
+  Min_Length_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
+  Min_Quality_Score_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
+  Mean_Quality_Score_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
+  Max_Quality_Score_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
 
 
   for (ii in 1:(length(Relative_Time_Per_Hours))) {
