@@ -27,16 +27,16 @@
 #' # Save ggplot2 tables:
 #' NanoStatsM(List,Table, DataOut=DataOut,KeepGGObj=TRUE)
 
+## belongs into DESCRIPTION file of the package
+library(reshape2)
+library(scales)
+library(ggplot2)
+library(RColorBrewer)
+library(grid)
+library(gridExtra)
 
 
-NanoStatsM<-function(NanoMList,NanoMTable,DataOut, KeepGGObj=FALSE) {
-
-  library(reshape2)
-  library(scales)
-  library(ggplot2)
-  library(RColorBrewer)
-  library(grid)
-  library(gridExtra)
+NanoStatsM <- function(NanoMList, NanoMTable, DataOut, KeepGGObj=FALSE) {
 
   label <- as.character(NanoMList[[4]])
   Directory <- file.path(DataOut, label)
@@ -111,233 +111,215 @@ NanoStatsM<-function(NanoMList,NanoMTable,DataOut, KeepGGObj=FALSE) {
 
 
   message("Analyzing...")
+  lenRTPH <- length(Relative_Time_Per_Hours)
+  Reads_Per_Hour <- numeric(lenRTPH)
+  Base_Pairs_Per_Hour <- numeric(lenRTPH)
+  Max_Length_Per_Hour <- numeric(lenRTPH)
+  Mean_Length_Per_Hour <- numeric(lenRTPH)
+  Min_Length_Per_Hour <- numeric(lenRTPH)
+  Min_Quality_Score_Per_Hour <- numeric(lenRTPH)
+  Mean_Quality_Score_Per_Hour <- numeric(lenRTPH)
+  Max_Quality_Score_Per_Hour <- numeric(lenRTPH)
 
-  Reads_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
-  Base_Pairs_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
-  Max_Length_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
-  Mean_Length_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
-  Min_Length_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
-  Min_Quality_Score_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
-  Mean_Quality_Score_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
-  Max_Quality_Score_Per_Hour <- rep(0, length(Relative_Time_Per_Hours))
 
+  for (ii in seq_len(lenRTPH)) {
 
-  for (ii in 1:(length(Relative_Time_Per_Hours))) {
-
-    if (ii < length(Relative_Time_Per_Hours)) {
-      Index_Hours<-which(Relative_Time >= Relative_Time_Per_Hours[ii] & Relative_Time < Relative_Time_Per_Hours[ii+1])
+    if (ii < lenRTPH) {
+      Index_Hours <- which(Relative_Time >= Relative_Time_Per_Hours[ii] & Relative_Time < Relative_Time_Per_Hours[ii+1])
       if (length(Index_Hours) == 0) {
         next
+      }else{
+        Reads_Per_Hour[ii] <- length(Index_Hours)
+        Base_Pairs_Per_Hour[ii] <- sum(Template_Length[Index_Hours])
+        Mean_Length_Per_Hour[ii] <- mean(Template_Length[Index_Hours])
+        Max_Length_Per_Hour[ii] <- max(Template_Length[Index_Hours])
+        Min_Length_Per_Hour[ii] <- min(Template_Length[Index_Hours])
+        Mean_Quality_Score_Per_Hour[ii] <- mean(Quality_Score[Index_Hours])
+        Min_Quality_Score_Per_Hour[ii] <- min(Quality_Score[Index_Hours])
+        Max_Quality_Score_Per_Hour[ii] <- max(Quality_Score[Index_Hours])
       }
-      else
-      {
-        Reads_Per_Hour[ii]<-length(Index_Hours)
-        Base_Pairs_Per_Hour[ii]<-sum(Template_Length[Index_Hours])
-        Mean_Length_Per_Hour[ii]<-mean(Template_Length[Index_Hours])
-        Max_Length_Per_Hour[ii]<-max(Template_Length[Index_Hours])
-        Min_Length_Per_Hour[ii]<-min(Template_Length[Index_Hours])
-        Mean_Quality_Score_Per_Hour[ii]<-mean(Quality_Score[Index_Hours])
-        Min_Quality_Score_Per_Hour[ii]<-min(Quality_Score[Index_Hours])
-        Max_Quality_Score_Per_Hour[ii]<-max(Quality_Score[Index_Hours])
-      }
-    }
-    else {
-      Index_Hours<-which(Relative_Time == Relative_Time_Per_Hours[ii])
+    }else{
+      Index_Hours <- which(Relative_Time == Relative_Time_Per_Hours[ii])
 
       if (length(Index_Hours) == 0) {
         next
-      }
-      else {
-        Reads_Per_Hour[ii]<-length(Index_Hours)
-        Base_Pairs_Per_Hour[ii]<-sum(Template_Length[Index_Hours])
-        Mean_Length_Per_Hour[ii]<-Mean_Length_Per_Hour[ii-1]
-        Max_Length_Per_Hour[ii]<-Max_Length_Per_Hour[ii-1]
-        Min_Length_Per_Hour[ii]<-Min_Length_Per_Hour[ii-1]
-        Mean_Quality_Score_Per_Hour[ii]<-Mean_Quality_Score_Per_Hour[ii-1]
-        Min_Quality_Score_Per_Hour[ii]<-Min_Quality_Score_Per_Hour[ii-1]
-        Max_Quality_Score_Per_Hour[ii]<-Max_Quality_Score_Per_Hour[ii-1]
+      }else{
+        Reads_Per_Hour[ii] <- length(Index_Hours)
+        Base_Pairs_Per_Hour[ii] <- sum(Template_Length[Index_Hours])
+        Mean_Length_Per_Hour[ii] <- Mean_Length_Per_Hour[ii-1]
+        Max_Length_Per_Hour[ii] <- Max_Length_Per_Hour[ii-1]
+        Min_Length_Per_Hour[ii] <- Min_Length_Per_Hour[ii-1]
+        Mean_Quality_Score_Per_Hour[ii] <- Mean_Quality_Score_Per_Hour[ii-1]
+        Min_Quality_Score_Per_Hour[ii] <- Min_Quality_Score_Per_Hour[ii-1]
+        Max_Quality_Score_Per_Hour[ii] <- Max_Quality_Score_Per_Hour[ii-1]
       }
     }
   }
 
+  Cumulative_Reads <- cumsum(Reads_Per_Hour)
+  Cumulative_Basepairs <- cumsum(Base_Pairs_Per_Hour)
 
+  Channel_Vector <- as.numeric(Table_HDF5_Def[,2])
+  Mux_Vector <- as.numeric(Table_HDF5_Def[,3])
+  Channels_Number <- 1:512
 
-  Cumulative_Reads<-cumsum(Reads_Per_Hour)
-  Cumulative_Basepairs<-cumsum(Base_Pairs_Per_Hour)
+  Base_Pairs_Per_Channel <- NULL
+  Table_HDF5_Re <- list()
 
-  Channel_Vector<-as.numeric(Table_HDF5_Def[,2])
-  Mux_Vector<-as.numeric(Table_HDF5_Def[,3])
-  Channels_Number<-c(1:512)
-
-
-  Base_Pairs_Per_Channel<-c()
-
-  Table_HDF5_Re<-list()
-
-  for (iii in 1:length(Channels_Number)) {
-    Ind_Chann<-which(Channel_Vector == Channels_Number[iii])
-    Mux_Associated<-sort(Mux_Vector[Ind_Chann], index.return=TRUE)$ix
+  for (iii in seq_len(length(Channels_Number))) {
+    Ind_Chann <- which(Channel_Vector == Channels_Number[iii])
+    Mux_Associated <- sort(Mux_Vector[Ind_Chann], index.return=TRUE)$ix
     if (length(Ind_Chann) == 0) {
       next
     }
 
     if (length(Ind_Chann) == 1) {
-
-      Table_HDF5_Re[[iii]]<-Table_HDF5_Def[Ind_Chann,]
-
-    }
-
-
-    else {
-      Table_HDF5_Re[[iii]]<-Table_HDF5_Def[Ind_Chann,][Mux_Associated,]
+      Table_HDF5_Re[[iii]] <- Table_HDF5_Def[Ind_Chann,]
+    }else{
+      Table_HDF5_Re[[iii]] <- Table_HDF5_Def[Ind_Chann,][Mux_Associated,]
       #Table_HDF5_Reordered<-rbind(Table_HDF5_Reordered,Table_HDF5_Re) slow for very large tables
     }
-    Base_Pairs_Per_Channel[iii]<-sum(Template_Length[Ind_Chann])
+    Base_Pairs_Per_Channel[iii] <- sum(Template_Length[Ind_Chann])
   }
 
-  Table_HDF5_Reordered<-do.call(rbind,Table_HDF5_Re) # a lot faster
-
+  Table_HDF5_Reordered <- do.call(rbind,Table_HDF5_Re) # a lot faster
   #rownames(Table_HDF5_Reordered)<-c()
-
-
-  #PLOT CUMULATIVE READS/BP
-
-
+  
   message("Plotting...")
-
-  x<-Relative_Time_Per_Hours
-  y0.1<-Cumulative_Reads
-  data0.1<-data.frame('x'=x,'y'=y0.1)
-  data0.1$group<-"reads yield"
-
-
-  Cumulative_Reads_Plot<-ggplot(data0.1, aes(x=x, y=y, col=group)) +
+  
+  ## PLOT CUMULATIVE READS/BP
+  x <- Relative_Time_Per_Hours
+  y0.1 <- Cumulative_Reads
+  data0.1 <- data.frame('x'=x,'y'=y0.1)
+  data0.1$group <- "reads yield"
+  Cumulative_Reads_Plot <- ggplot(data0.1, aes(x=x, y=y, col=group)) +
     geom_line(size=.5) +
     scale_x_continuous(name="time(hrs)", breaks=(seq(0,Run_Duration,2)))+
     scale_y_continuous(name="# reads")+
     #geom_ribbon(data=subset(data0.1,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
     scale_color_manual(name='', values=c("reads yield" = "dodgerblue4"))+
     theme_bw()+
-    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))+
+    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), 
+          panel.background = element_blank(), axis.title.x = element_text(size=11),
+          axis.title.y = element_text(size=11))+
     theme(legend.position="bottom")
     #ggtitle("Cumulative Reads")
 
-
-
-  y0.2<-Cumulative_Basepairs
-  data0.2<-data.frame('x'=x,'y'=y0.2)
-  data0.2$group<-"bps yield"
-
-  Cumulative_Base_Pairs_Plot<-ggplot(data0.2, aes(x=x, y=y, col=group)) +
+  
+  y0.2 <- Cumulative_Basepairs
+  data0.2 <- data.frame('x'=x,'y'=y0.2)
+  data0.2$group <- "bps yield"
+  Cumulative_Base_Pairs_Plot <- ggplot(data0.2, aes(x=x, y=y, col=group)) +
     geom_line(size=.5) +
     scale_x_continuous(name="time(hrs)", breaks=(seq(0,Run_Duration,2)))+
     scale_y_continuous(name="# bps")+
     #geom_ribbon(data=subset(data0.2,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
     scale_color_manual(name='', values=c("bps yield" = "firebrick4"))+
     theme_bw()+
-    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))+
+    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), 
+          panel.background = element_blank(), axis.title.x = element_text(size=11), 
+          axis.title.y = element_text(size=11))+
     theme(legend.position="bottom")
     #ggtitle("Cumulative Base Pairs")
 
-  Cumulative_Plot<-grid.arrange(Cumulative_Reads_Plot,Cumulative_Base_Pairs_Plot, nrow=2, ncol=1)
-
+  Cumulative_Plot <- grid.arrange(Cumulative_Reads_Plot,Cumulative_Base_Pairs_Plot, nrow=2, ncol=1)
   ggsave(file.path(Directory, "Yield.pdf"), device="pdf", Cumulative_Plot, height=10,width=15)
 
-
-
-  #PLOT PER-HOUR READS/BPs/QUALITY/LENGTH
-
-  y1<-Reads_Per_Hour
-  data1<-data.frame('x'=x,'y'=y1)
-  data1$group<-"# reads / 30 mins"
-
-  Reads_Per_Hour_Plot<-ggplot(data1, aes(x=x, y=y, col=group)) +
+  ## PLOT PER-HOUR READS/BPs/QUALITY/LENGTH
+  y1 <- Reads_Per_Hour
+  data1 <- data.frame('x'=x,'y'=y1)
+  data1$group <- "# reads / 30 mins"
+  Reads_Per_Hour_Plot <- ggplot(data1, aes(x=x, y=y, col=group)) +
     geom_line(size=.5) +
     scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2)))+
     scale_y_continuous(name="# reads")+
     #geom_ribbon(data=subset(data1,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
     scale_color_manual(name='', values=c("# reads / 30 mins" = "dodgerblue4"))+
     theme_bw()+
-    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))+
+    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), 
+          panel.background = element_blank(), axis.title.x = element_text(size=11), 
+          axis.title.y = element_text(size=11))+
     theme(legend.position="bottom")
     #ggtitle("Reads")
 
-
-  y2<-Base_Pairs_Per_Hour
-  data2<-data.frame('x'=x,'y'=y2)
-  data2$group<-"# bps / 30 mins"
-
-
-  Base_Pairs_Per_Hour_Plot<-ggplot(data2, aes(x=x, y=y, col=group)) +
+  y2 <- Base_Pairs_Per_Hour
+  data2 <- data.frame('x'=x,'y'=y2)
+  data2$group <- "# bps / 30 mins"
+  Base_Pairs_Per_Hour_Plot <- ggplot(data2, aes(x=x, y=y, col=group)) +
     geom_line(size=.5) +
     scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2)))+
     scale_y_continuous(name="# bps")+
     #geom_ribbon(data=subset(data2,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
     scale_color_manual(name='', values=c("# bps / 30 mins" = "firebrick4"))+
     theme_bw()+
-    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))+
+    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), 
+          panel.background = element_blank(), axis.title.x = element_text(size=11), 
+          axis.title.y = element_text(size=11))+
     theme(legend.position="bottom")
     #ggtitle("Base Pairs")
 
-
-  y3.0<-log10(Mean_Length_Per_Hour)
-  data3.0.0<-data.frame('x'=x,'y'=Mean_Length_Per_Hour)
-  data3.0<-data.frame('x'=x,'y'=y3.0)
-  data3.0$group<-"avg length"
-
-  y3.1<-log10(Max_Length_Per_Hour)
-  data3.1<-data.frame('x'=x,'y'=y3.1)
-  data3.1$group<-"max length"
-
-  y3.2<-log10(Min_Length_Per_Hour)
-  data3.2<-data.frame('x'=x,'y'=y3.2)
-  data3.2$group<-"min length"
-
-  data3<-rbind(data3.0, data3.1, data3.2)
-
-  Length_Per_Hour_Plot<-ggplot(data3, aes(x=x, y=y, col=group)) +
+  y3.0 <- log10(Mean_Length_Per_Hour)
+  data3.0.0 <- data.frame('x'=x,'y'=Mean_Length_Per_Hour)
+  data3.0 <- data.frame('x'=x,'y'=y3.0)
+  data3.0$group <- "avg length"
+  
+  y3.1 <- log10(Max_Length_Per_Hour)
+  data3.1 <- data.frame('x'=x,'y'=y3.1)
+  data3.1$group <- "max length"
+  
+  y3.2 <- log10(Min_Length_Per_Hour)
+  data3.2 <- data.frame('x'=x,'y'=y3.2)
+  data3.2$group <- "min length"
+  
+  data3 <- rbind(data3.0, data3.1, data3.2)
+  Length_Per_Hour_Plot <- ggplot(data3, aes(x=x, y=y, col=group)) +
     geom_line(size=.5) +
     scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2)))+
     scale_y_continuous(name="length (bps)", breaks=c(2,3,4,5,6), labels=c("100","1000","10000","100000","1000000"))+
     #geom_ribbon(data=subset(data3,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0, alpha=.7) +
-    scale_color_manual(name='', values=c("avg length" = "forestgreen", "min length" = "green", "max length" = "darkolivegreen"))+
+    scale_color_manual(name='', values=c("avg length" = "forestgreen", "min length" = "green", 
+                                         "max length" = "darkolivegreen"))+
     theme_bw()+
-    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))+
+    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(),
+          panel.background = element_blank(), axis.title.x = element_text(size=11),
+          axis.title.y = element_text(size=11))+
     theme(legend.position="bottom")
     #ggtitle("Length")
 
-  y4.0<-Mean_Quality_Score_Per_Hour
-  data4.0<-data.frame('x'=x,'y'=y4.0)
-  data4.0$group<-"avg quality"
+  
+  y4.0 <- Mean_Quality_Score_Per_Hour
+  data4.0 <- data.frame('x'=x,'y'=y4.0)
+  data4.0$group <- "avg quality"
 
-  y4.1<-Min_Quality_Score_Per_Hour
-  data4.1<-data.frame('x'=x,'y'=y4.1)
-  data4.1$group<-"min quality"
+  y4.1 <- Min_Quality_Score_Per_Hour
+  data4.1 <- data.frame('x'=x,'y'=y4.1)
+  data4.1$group <- "min quality"
 
-  y4.2<-Max_Quality_Score_Per_Hour
-  data4.2<-data.frame('x'=x,'y'=y4.2)
-  data4.2$group<-"max quality"
+  y4.2 <- Max_Quality_Score_Per_Hour
+  data4.2 <- data.frame('x'=x,'y'=y4.2)
+  data4.2$group <- "max quality"
 
   data4<-rbind(data4.0,data4.1,data4.2)
-
-  Quality_Score_Per_Hour_Plot<-ggplot(data4, aes(x=x, y=y, col=group)) +
+  Quality_Score_Per_Hour_Plot <- ggplot(data4, aes(x=x, y=y, col=group)) +
     geom_line(size=.5) +
     scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2)))+
     scale_y_continuous(name="quality (phred)")+
     #geom_ribbon(data=subset(data4,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,alpha=.7) +
-    scale_color_manual(name='', values=c("avg quality" = "darkorange", "min quality" = "gold", "max quality" = "orangered"))+
+    scale_color_manual(name='', values=c("avg quality" = "darkorange", "min quality" = "gold", 
+                                         "max quality" = "orangered"))+
     theme_bw()+
-    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))+
+    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), 
+          panel.background = element_blank(), axis.title.x = element_text(size=11),
+          axis.title.y = element_text(size=11))+
     theme(legend.position="bottom")
     #ggtitle("Quality")
 
 
-  Others_Plot<-grid.arrange(Reads_Per_Hour_Plot,Base_Pairs_Per_Hour_Plot,Length_Per_Hour_Plot,Quality_Score_Per_Hour_Plot, nrow=2, ncol=2)
-
+  Others_Plot <- grid.arrange(Reads_Per_Hour_Plot, Base_Pairs_Per_Hour_Plot, 
+                              Length_Per_Hour_Plot, Quality_Score_Per_Hour_Plot, nrow=2, ncol=2)
   ggsave(file.path(Directory, "RBLQ.pdf"), device="pdf", Others_Plot, height=10,width=15)
 
-  #PASS/FAIL
-
+  ## PASS/FAIL
   blank_theme <- theme_minimal()+
     theme(
       axis.title.x = element_blank(),
@@ -355,7 +337,7 @@ NanoStatsM<-function(NanoMList,NanoMTable,DataOut, KeepGGObj=FALSE) {
   )
 
 
-  Data_Pass_Fail_Percentage_Plot<-ggplot(Data_Pass_Fail_Percentage, aes(x="", y=value, fill=group))+
+  Data_Pass_Fail_Percentage_Plot <- ggplot(Data_Pass_Fail_Percentage, aes(x="", y=value, fill=group))+
     geom_bar(width = 1, size = 1, color = "white", stat = "identity")+
     geom_text(aes(label = scales::percent(value)), position = position_stack(vjust = 0.5))+
     coord_polar("y", start=0) +
@@ -370,7 +352,7 @@ NanoStatsM<-function(NanoMList,NanoMTable,DataOut, KeepGGObj=FALSE) {
     value = c(List.Files.HDF5_Pass.length, (List.Files.HDF5_Fail_Length+List.Files.HDF5_Skip_Length))
   )
 
-  Data_Pass_Fail_Tot_Plot<-ggplot(Data_Pass_Fail_Tot, aes(x="", y=value, fill=group))+
+  Data_Pass_Fail_Tot_Plot <- ggplot(Data_Pass_Fail_Tot, aes(x="", y=value, fill=group))+
     geom_bar(width = 1, size = 1, color = "white", stat = "identity")+
     geom_text(aes(label = value), position = position_stack(vjust = 0.5))+
     coord_polar("y", start=0) +
@@ -381,22 +363,14 @@ NanoStatsM<-function(NanoMList,NanoMTable,DataOut, KeepGGObj=FALSE) {
 
   #WILL BE SAVED WITH GC CONTENT
 
-
   ###################### LENGTH_VS_QUALITY ######################
-
-
 
   limit <- 500000 #limit number of point to plot. Too slow otherwise
 
   if (length(Template_Length) <= limit) {
-
     Tot <- data.frame(cbind(Template_Length,Quality_Score))
     colnames(Tot) <- c("Template_Length","Quality_Score")
-
-  }
-
-  else {
-
+  }else{
     message("Too many points for LvsQ scatterplot: rescaling, but mantaining proportions ...")
     tmp <- cbind(Template_Length,Quality_Score)
     Sample <- data.frame(tmp[sample(nrow(tmp), limit),])
@@ -405,16 +379,27 @@ NanoStatsM<-function(NanoMList,NanoMTable,DataOut, KeepGGObj=FALSE) {
     indmin_q <- which.min(Quality_Score)
     indmax_q <- which.max(Quality_Score)
     Bound <- tmp[c(indmin_l, indmax_l, indmin_q, indmax_q),]
-    Tot<-data.frame(rbind(Sample,Bound))
+    Tot <- data.frame(rbind(Sample,Bound))
     colnames(Tot) <- c("Template_Length","Quality_Score")
-
   }
 
-  ScatterTheme <- list(labs(x="length (bps)",y="quality (phred)"),theme_bw(), theme(legend.position=c(1,0),legend.justification=c(1,0), legend.background=element_blank(),legend.direction="horizontal", legend.title=element_text(face="bold.italic")))
+  ScatterTheme <- list(labs(x="length (bps)",y="quality (phred)"), theme_bw(), 
+                       theme(legend.position=c(1,0), legend.justification=c(1,0), 
+                             legend.background=element_blank(), legend.direction="horizontal", 
+                             legend.title=element_text(face="bold.italic")))
 
-
-  hist_top_mean_length<-ggplot(data.frame(Template_Length), aes(x=Template_Length))+theme_bw()+ geom_histogram(aes(y = ..count../1000),col="darkolivegreen", fill="forestgreen",boundary = min(Template_Length), bins=30)+labs(x="",y=expression("Count"["(10^3)"]))+scale_x_continuous(limits=c(min(Template_Length),max(Template_Length)))
-  hist_right_mean_quality<-ggplot(data.frame(Quality_Score), aes(x=Quality_Score))+ theme_bw()+ geom_histogram(aes(y = ..count../1000),col="orangered", fill="darkorange",boundary = min(Quality_Score), bins=30)+ labs(x="",y=expression("Count"["(10^3)"]))+coord_flip()+scale_x_continuous(limits=c(min(Quality_Score),max(Quality_Score)))
+  hist_top_mean_length <- ggplot(data.frame(Template_Length), aes(x=Template_Length))+
+                            theme_bw() + 
+                            geom_histogram(aes(y = ..count../1000), col="darkolivegreen", 
+                                           fill="forestgreen", boundary = min(Template_Length), bins=30)+
+                            labs(x="",y=expression("Count"["(10^3)"]))+
+                            scale_x_continuous(limits=c(min(Template_Length),max(Template_Length)))
+  hist_right_mean_quality <- ggplot(data.frame(Quality_Score), aes(x=Quality_Score))+ 
+                                theme_bw()+ 
+                                geom_histogram(aes(y = ..count../1000), col="orangered", 
+                                               fill="darkorange",boundary = min(Quality_Score), bins=30)+ 
+                                labs(x="",y=expression("Count"["(10^3)"]))+ coord_flip()+ 
+                                scale_x_continuous(limits=c(min(Quality_Score),max(Quality_Score)))
   empty <- ggplot()+geom_point(aes(1,1), colour="white")+
     theme(axis.ticks=element_blank(),
           panel.background=element_blank(),
@@ -430,42 +415,36 @@ NanoStatsM<-function(NanoMList,NanoMTable,DataOut, KeepGGObj=FALSE) {
   ggsave(file.path(Directory, "LvsQ.pdf"), device="pdf", Length_VS_Quality_Plot, height=10,width=15)
 
 
-
-
-  # MUX PRODUCTIVITY PER CHANNEL
-
-  Mux_Numbers<-c(1:4)
-
-  Chan<-as.numeric(Table_HDF5_Reordered[,2])
-  Mu<-as.numeric(Table_HDF5_Reordered[,3])
-  Le<-as.numeric(Table_HDF5_Reordered[,5])
+  ## MUX PRODUCTIVITY PER CHANNEL
+  Mux_Numbers <- 1:4
+  Chan <- as.numeric(Table_HDF5_Reordered[,2])
+  Mu <- as.numeric(Table_HDF5_Reordered[,3])
+  Le <- as.numeric(Table_HDF5_Reordered[,5])
 
   List_Of_Mux<-list()
-
-  for (iii in 1:length(Channels_Number)) {
-    Ind_Chann<-which(Chan == Channels_Number[iii])
-    Mux_Associated_Number<-sort(Mu[Ind_Chann])
-    Table_Mux<-c()
-    for (lll in 1:length(Mux_Numbers)) {
-      Ind_Mux<-which(Mux_Associated_Number == Mux_Numbers[lll])
-      Chan_Mux<-Chan[Ind_Chann][Ind_Mux]
+  for (iii in seq_len(length(Channels_Number))) {
+    Ind_Chann <- which(Chan == Channels_Number[iii])
+    Mux_Associated_Number <- sort(Mu[Ind_Chann])
+    Table_Mux <- NULL
+    for (lll in seq_len((Mux_Numbers))) {
+      Ind_Mux <- which(Mux_Associated_Number == Mux_Numbers[lll])
+      Chan_Mux <- Chan[Ind_Chann][Ind_Mux]
       if (length(Chan_Mux) == 0) {
-        Mux<-NA
-        Lenght_Per_Mux<-NA
-        Table_Mu<-cbind(NA, NA, NA)
-        Table_Mux<-rbind(Table_Mux,Table_Mu)
-      }
-      else {
-        Mux<-Mu[Ind_Chann][Ind_Mux]
-        Lenght_Per_Mux<-sum(Le[Ind_Chann][Ind_Mux])
-        Table_Mu<-cbind(unique(Chan_Mux), unique(Mux),Lenght_Per_Mux)
-        Table_Mux<-rbind(Table_Mux,Table_Mu)
+        Mux <- NA
+        Lenght_Per_Mux <- NA
+        Table_Mu <- cbind(NA, NA, NA)
+        Table_Mux <- rbind(Table_Mux, Table_Mu)
+      }else{
+        Mux <- Mu[Ind_Chann][Ind_Mux]
+        Lenght_Per_Mux <- sum(Le[Ind_Chann][Ind_Mux])
+        Table_Mu <- cbind(unique(Chan_Mux), unique(Mux), Lenght_Per_Mux)
+        Table_Mux <- rbind(Table_Mux, Table_Mu)
       }
     }
-    List_Of_Mux[[iii]]<-Table_Mux
+    List_Of_Mux[[iii]] <- Table_Mux
   }
 
-  Table_Mux_Def<-do.call(rbind,List_Of_Mux)
+  Table_Mux_Def <- do.call(rbind, List_Of_Mux)
 
 
   #colnames(Table_Mux_Def)<-c("Channel Number", "Mux Number", "Total Reads Produced Per Mux")
