@@ -426,7 +426,7 @@ NanoStatsM <- function(NanoMList, NanoMTable, DataOut, KeepGGObj=FALSE) {
     Ind_Chann <- which(Chan == Channels_Number[iii])
     Mux_Associated_Number <- sort(Mu[Ind_Chann])
     Table_Mux <- NULL
-    for (lll in seq_len((Mux_Numbers))) {
+    for (lll in seq_len(length(Mux_Numbers))) {
       Ind_Mux <- which(Mux_Associated_Number == Mux_Numbers[lll])
       Chan_Mux <- Chan[Ind_Chann][Ind_Mux]
       if (length(Chan_Mux) == 0) {
