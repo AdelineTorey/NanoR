@@ -164,7 +164,7 @@ NanoStatsM <- function(NanoMList, NanoMTable, DataOut, KeepGGObj=FALSE) {
   Channels_Number <- 1:512
 
   Base_Pairs_Per_Channel <- NULL
-  Table_HDF5_Re <- list()
+  Table_HDF5_Re <- vector(mode = "list", length(Channels_Number))
 
   for (iii in seq_len(length(Channels_Number))) {
     Ind_Chann <- which(Channel_Vector == Channels_Number[iii])
@@ -421,7 +421,7 @@ NanoStatsM <- function(NanoMList, NanoMTable, DataOut, KeepGGObj=FALSE) {
   Mu <- as.numeric(Table_HDF5_Reordered[,3])
   Le <- as.numeric(Table_HDF5_Reordered[,5])
 
-  List_Of_Mux<-list()
+  List_Of_Mux <- vector(mode = "list", length(Channels_Number))
   for (iii in seq_len(length(Channels_Number))) {
     Ind_Chann <- which(Chan == Channels_Number[iii])
     Mux_Associated_Number <- sort(Mu[Ind_Chann])
