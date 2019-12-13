@@ -190,41 +190,44 @@ NanoStatsM <- function(NanoMList, NanoMTable, DataOut, KeepGGObj=FALSE) {
   ## PLOT CUMULATIVE READS/BP
   x <- Relative_Time_Per_Hours
   y0.1 <- Cumulative_Reads
-  data0.1 <- data.frame('x'=x,'y'=y0.1)
+  data0.1 <- data.frame('x' = x, 'y' = y0.1)
   data0.1$group <- "reads yield"
-  Cumulative_Reads_Plot <- ggplot(data0.1, aes(x=x, y=y, col=group)) +
-    geom_line(size=.5) +
-    scale_x_continuous(name="time(hrs)", breaks=(seq(0,Run_Duration,2)))+
-    scale_y_continuous(name="# reads")+
+  Cumulative_Reads_Plot <- ggplot(data0.1, aes(x = x, y = y, col = group)) +
+    geom_line(size=.5, colour = "dodgerblue4") +
+    scale_x_continuous(name = "time(hrs)", breaks = (seq(0, Run_Duration, 2))) +
+    scale_y_continuous(name = "# reads") +
     #geom_ribbon(data=subset(data0.1,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
-    scale_color_manual(name='', values=c("reads yield" = "dodgerblue4"))+
-    theme_bw()+
+    #scale_color_manual(name='', values=c("reads yield" = "dodgerblue4"))+
+    theme_bw() +
     theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), 
           panel.background = element_blank(), axis.title.x = element_text(size=11),
-          axis.title.y = element_text(size=11))+
-    theme(legend.position="bottom")
+         axis.title.y = element_text(size=11))
+    #theme(legend.position="bottom")
     #ggtitle("Cumulative Reads")
 
-  
   y0.2 <- Cumulative_Basepairs
-  data0.2 <- data.frame('x'=x,'y'=y0.2)
+  data0.2 <- data.frame('x' = x,'y' = y0.2)
   data0.2$group <- "bps yield"
-  Cumulative_Base_Pairs_Plot <- ggplot(data0.2, aes(x=x, y=y, col=group)) +
-    geom_line(size=.5) +
-    scale_x_continuous(name="time(hrs)", breaks=(seq(0,Run_Duration,2)))+
-    scale_y_continuous(name="# bps")+
+  Cumulative_Base_Pairs_Plot <- ggplot(data0.2, aes(x = x, y = y, col = group)) +
+    geom_line(size=.5, colour = "firebrick4") +
+    scale_x_continuous(name = "time(hrs)", breaks = (seq(0, Run_Duration, 2))) +
+    scale_y_continuous(name = "# bps") +
     #geom_ribbon(data=subset(data0.2,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
-    scale_color_manual(name='', values=c("bps yield" = "firebrick4"))+
-    theme_bw()+
+    #scale_color_manual(name='', values=c("bps yield" = "firebrick4"))+
+    theme_bw() +
     theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), 
           panel.background = element_blank(), axis.title.x = element_text(size=11), 
-          axis.title.y = element_text(size=11))+
-    theme(legend.position="bottom")
+          axis.title.y = element_text(size=11))
+    #theme(legend.position="bottom")
     #ggtitle("Cumulative Base Pairs")
 
-  Cumulative_Plot <- grid.arrange(Cumulative_Reads_Plot,Cumulative_Base_Pairs_Plot, nrow=2, ncol=1)
+  ## display plots in one file
+  Cumulative_Plot <- grid.arrange(Cumulative_Reads_Plot, Cumulative_Base_Pairs_Plot, nrow=2, ncol=1)
   ggsave(file.path(Directory, "Yield.pdf"), device="pdf", Cumulative_Plot, height=10,width=15)
-
+  
+  ## legend "reads yield" and "bps yield" do not show now, but there is only one line so no need legend?
+  ## should include title? all graphs should have title?
+  
   ## PLOT PER-HOUR READS/BPs/QUALITY/LENGTH
   y1 <- Reads_Per_Hour
   data1 <- data.frame('x'=x,'y'=y1)
