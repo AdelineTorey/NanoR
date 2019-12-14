@@ -232,57 +232,57 @@ NanoStatsM <- function(NanoMList, NanoMTable, DataOut, KeepGGObj=FALSE) {
   y1 <- Reads_Per_Hour
   data1 <- data.frame('x'=x,'y'=y1)
   data1$group <- "# reads / 30 mins"
-  Reads_Per_Hour_Plot <- ggplot(data1, aes(x=x, y=y, col=group)) +
-    geom_line(size=.5) +
-    scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2)))+
-    scale_y_continuous(name="# reads")+
+  Reads_Per_Hour_Plot <- ggplot(data1, aes(x = x, y = y, col = group)) +
+    geom_line(size=.5, colour = "dodgerblue4") +
+    scale_x_continuous(name="time (hrs)", breaks=(seq(0, Run_Duration, 2))) +
+    scale_y_continuous(name="# reads") +
     #geom_ribbon(data=subset(data1,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
-    scale_color_manual(name='', values=c("# reads / 30 mins" = "dodgerblue4"))+
-    theme_bw()+
+    #scale_color_manual(name='', values=c("# reads / 30 mins" = "dodgerblue4"))+
+    theme_bw() +
     theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), 
           panel.background = element_blank(), axis.title.x = element_text(size=11), 
-          axis.title.y = element_text(size=11))+
-    theme(legend.position="bottom")
+          axis.title.y = element_text(size=11))
+    #theme(legend.position="bottom")
     #ggtitle("Reads")
 
   y2 <- Base_Pairs_Per_Hour
-  data2 <- data.frame('x'=x,'y'=y2)
+  data2 <- data.frame('x' = x,'y' = y2)
   data2$group <- "# bps / 30 mins"
   Base_Pairs_Per_Hour_Plot <- ggplot(data2, aes(x=x, y=y, col=group)) +
-    geom_line(size=.5) +
-    scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2)))+
-    scale_y_continuous(name="# bps")+
+    geom_line(size=.5, colour = "firebrick4") +
+    scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2))) +
+    scale_y_continuous(name="# bps") +
     #geom_ribbon(data=subset(data2,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
-    scale_color_manual(name='', values=c("# bps / 30 mins" = "firebrick4"))+
+    #scale_color_manual(name='', values=c("# bps / 30 mins" = "firebrick4"))+
     theme_bw()+
     theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), 
           panel.background = element_blank(), axis.title.x = element_text(size=11), 
-          axis.title.y = element_text(size=11))+
-    theme(legend.position="bottom")
+          axis.title.y = element_text(size=11))
+    #theme(legend.position="bottom")
     #ggtitle("Base Pairs")
 
   y3.0 <- log10(Mean_Length_Per_Hour)
-  data3.0.0 <- data.frame('x'=x,'y'=Mean_Length_Per_Hour)
-  data3.0 <- data.frame('x'=x,'y'=y3.0)
+  data3.0.0 <- data.frame('x' = x,'y' = Mean_Length_Per_Hour)
+  data3.0 <- data.frame('x' = x,'y' = y3.0)
   data3.0$group <- "avg length"
   
   y3.1 <- log10(Max_Length_Per_Hour)
-  data3.1 <- data.frame('x'=x,'y'=y3.1)
+  data3.1 <- data.frame('x' = x,'y' = y3.1)
   data3.1$group <- "max length"
   
   y3.2 <- log10(Min_Length_Per_Hour)
-  data3.2 <- data.frame('x'=x,'y'=y3.2)
+  data3.2 <- data.frame('x' = x,'y' = y3.2)
   data3.2$group <- "min length"
   
   data3 <- rbind(data3.0, data3.1, data3.2)
-  Length_Per_Hour_Plot <- ggplot(data3, aes(x=x, y=y, col=group)) +
+  Length_Per_Hour_Plot <- ggplot(data3, aes(x = x, y = y, col = group)) +
     geom_line(size=.5) +
-    scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2)))+
-    scale_y_continuous(name="length (bps)", breaks=c(2,3,4,5,6), labels=c("100","1000","10000","100000","1000000"))+
+    scale_x_continuous(name="time (hrs)", breaks=(seq(0, Run_Duration, 2)))+
+    scale_y_continuous(name="length (bps)", breaks=c(2, 3, 4, 5, 6), labels=c("100", "1000", "10000", "100000", "1000000")) +
     #geom_ribbon(data=subset(data3,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0, alpha=.7) +
     scale_color_manual(name='', values=c("avg length" = "forestgreen", "min length" = "green", 
                                          "max length" = "darkolivegreen"))+
-    theme_bw()+
+    theme_bw() +
     theme(axis.line = element_line(colour = "black"), panel.border = element_blank(),
           panel.background = element_blank(), axis.title.x = element_text(size=11),
           axis.title.y = element_text(size=11))+
@@ -291,29 +291,29 @@ NanoStatsM <- function(NanoMList, NanoMTable, DataOut, KeepGGObj=FALSE) {
 
   
   y4.0 <- Mean_Quality_Score_Per_Hour
-  data4.0 <- data.frame('x'=x,'y'=y4.0)
+  data4.0 <- data.frame('x' = x,'y' = y4.0)
   data4.0$group <- "avg quality"
 
   y4.1 <- Min_Quality_Score_Per_Hour
-  data4.1 <- data.frame('x'=x,'y'=y4.1)
+  data4.1 <- data.frame('x' = x,'y' = y4.1)
   data4.1$group <- "min quality"
 
   y4.2 <- Max_Quality_Score_Per_Hour
-  data4.2 <- data.frame('x'=x,'y'=y4.2)
+  data4.2 <- data.frame('x' = x,'y' = y4.2)
   data4.2$group <- "max quality"
 
-  data4<-rbind(data4.0,data4.1,data4.2)
-  Quality_Score_Per_Hour_Plot <- ggplot(data4, aes(x=x, y=y, col=group)) +
+  data4<-rbind(data4.0, data4.1, data4.2)
+  Quality_Score_Per_Hour_Plot <- ggplot(data4, aes(x = x, y = y, col = group)) +
     geom_line(size=.5) +
-    scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2)))+
-    scale_y_continuous(name="quality (phred)")+
+    scale_x_continuous(name="time (hrs)", breaks=(seq(0, Run_Duration, 2))) +
+    scale_y_continuous(name="quality (phred)") +
     #geom_ribbon(data=subset(data4,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,alpha=.7) +
     scale_color_manual(name='', values=c("avg quality" = "darkorange", "min quality" = "gold", 
                                          "max quality" = "orangered"))+
-    theme_bw()+
+    theme_bw() +
     theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), 
           panel.background = element_blank(), axis.title.x = element_text(size=11),
-          axis.title.y = element_text(size=11))+
+          axis.title.y = element_text(size=11)) +
     theme(legend.position="bottom")
     #ggtitle("Quality")
 
