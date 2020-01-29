@@ -222,7 +222,7 @@ NanoStatsM <- function(NanoMList, NanoMTable, DataOut, KeepGGObj=FALSE) {
     #ggtitle("Cumulative Base Pairs")
 
   ## display plots in one file
-  Cumulative_Plot <- grid.arrange(Cumulative_Reads_Plot, Cumulative_Base_Pairs_Plot, nrow=2, ncol=1)
+  Cumulative_Plot <- grid.arrange(Cumulative_Reads_Plot, Cumulative_Base_Pairs_Plot, nrow=2, ncol=1, top = textGrob("Reads and base pairs yield",gp=gpar(fontsize=20)))
   ggsave(file.path(Directory, "Yield.pdf"), device="pdf", Cumulative_Plot, height=10,width=15)
   
   ## legend "reads yield" and "bps yield" do not show now, but there is only one line so no need legend?
