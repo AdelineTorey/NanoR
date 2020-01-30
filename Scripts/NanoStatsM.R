@@ -319,8 +319,8 @@ NanoStatsM <- function(NanoMList, NanoMTable, DataOut, KeepGGObj=FALSE) {
 
 
   Others_Plot <- grid.arrange(Reads_Per_Hour_Plot, Base_Pairs_Per_Hour_Plot, 
-                              Length_Per_Hour_Plot, Quality_Score_Per_Hour_Plot, nrow=2, ncol=2)
-  ggsave(file.path(Directory, "RBLQ.pdf"), device="pdf", Others_Plot, height=10,width=15)
+                              Length_Per_Hour_Plot, Quality_Score_Per_Hour_Plot, nrow=2, ncol=2, top = textGrob("Reads number, base pairs number, reads length and quality calculated every 30 minutes", gp=gpar(fontsize=20)))
+  ggsave(file.path(Directory, "RBLQ.pdf"), device="pdf", Others_Plot, height=10, width=15)
 
   ## PASS/FAIL
   blank_theme <- theme_minimal()+
