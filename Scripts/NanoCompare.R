@@ -14,27 +14,22 @@
 #' Labels<-c("Label1","Label2") #labels
 #' NanoCompare(DataIn=DataIn,DataOut="Path/To/DataOut",Labels=Labels) #compare
 
+## put in description file
+library(ggplot2)
+library(RColorBrewer)
+library(grid)
 
-NanoCompare<-function(DataIn,DataOut,Labels) { #Now is a lot faster and can deal with theoretically any number of experiments
+NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can deal with theoretically any number of experiments
   
-  library(ggplot2)
-  library(RColorBrewer)
-  library(grid)
-
-
   define_region <- function(row, col)
   {
     viewport(layout.pos.row = row, layout.pos.col = col)
   }
-
   if (length(DataIn) != length(Labels)) { #check
-    
-    stop("Different number of input data and labels")
-  
+     stop("Different number of input data and labels")
   }
 
-
-  Directory<-file.path(DataOut,"ComparisonPlots")
+  Directory <- file.path(DataOut,"ComparisonPlots")
   dir.create(Directory, showWarnings = FALSE)
 
 
@@ -50,98 +45,67 @@ NanoCompare<-function(DataIn,DataOut,Labels) { #Now is a lot faster and can deal
     IsCorrect<-list.files(DataIn[i])
 
     if (length(IsCorrect) != 4) { #check
-
       stop("Expected different number of files in ", DataIn[i])
-
     }
 
-    Reads<-read.table(file.path(DataIn[i], 'Reads.txt'), sep='\t', header=TRUE)
+    Reads <- read.table(file.path(DataIn[i], 'Reads.txt'), sep='\t', header=TRUE)
     Reads$sample <- as.character(Labels[i])
     
-    Times<-c()
+    Times <- c()
 
     for (l in 1:length(Reads$x)) {
-
       if (as.numeric(Reads$x[l]) >=0 && as.numeric(Reads$x[l]) < 10) {
-
         Times[l]<-'0-10 hrs'
-
       }
-
       if (as.numeric(Reads$x[l]) >= 10 && as.numeric(Reads$x[l]) < 20) {
-
         Times[l]<-'10-20 hrs'
-
       }
-
       if (as.numeric(Reads$x[l]) >= 20 && as.numeric(Reads$x[l]) < 30) {
-
         Times[l]<-'20-30 hrs'
-
       }
-
       if (as.numeric(Reads$x[l]) >= 30 && as.numeric(Reads$x[l]) < 40) {
-
         Times[l]<-'30-40 hrs'
-
       }
-
       if (as.numeric(Reads$x[l]) >= 40 && as.numeric(Reads$x[l]) < 50) {
-
         Times[l]<-'40-50 hrs'
-
       }
-
       if (as.numeric(Reads$x[l]) >= 50  && as.numeric(Reads$x[l]) < 60) {
-
         Times[l]<-'50-60 hrs'
-
       }
-
       if (as.numeric(Reads$x[l]) >= 60  && as.numeric(Reads$x[l]) < 70) {
-
         Times[l]<-'60-70 hrs'
-
       }
-
       if (as.numeric(Reads$x[l]) >= 70  && as.numeric(Reads$x[l]) <= 80) {
-
         Times[l]<-'70-80 hrs'
-
       }
-
-
-
     }
 
-    Reads$times<-Times
-    Reads_[[i]]<-Reads
-    BasePairs<-read.table(file.path(DataIn[i], 'Bases.txt'), sep='\t', header=TRUE)
+    Reads$times <- Times
+    Reads_[[i]] <- Reads
+    BasePairs <- read.table(file.path(DataIn[i], 'Bases.txt'), sep='\t', header=TRUE)
     BasePairs$sample <- as.character(Labels[i])
-    BasePairs$times<-Times
+    BasePairs$times <- Times
 
-    BasePairs_[[i]]<-BasePairs    
-    Length<-read.table(file.path(DataIn[i], 'Length.txt'), sep='\t', header=TRUE)
+    BasePairs_[[i]] <- BasePairs    
+    Length <- read.table(file.path(DataIn[i], 'Length.txt'), sep='\t', header=TRUE)
     Length$sample <- as.character(Labels[i])
-    Length$times<-Times
-    Length_[[i]]<-Length
-    Quality<-read.table(file.path(DataIn[i], 'Quality.txt'), sep='\t', header=TRUE)
+    Length$times <- Times
+    Length_[[i]] <- Length
+    Quality <- read.table(file.path(DataIn[i], 'Quality.txt'), sep='\t', header=TRUE)
     Quality$sample <- as.character(Labels[i])
-    Quality$times<-Times
-    Quality_[[i]]<-Quality
-
-  
+    Quality$times <- Times
+    Quality_[[i]] <- Quality
   }
 
-  TotReads<-do.call(rbind,Reads_)
-  TotBases<-do.call(rbind,BasePairs_)
-  TotLength<-do.call(rbind,Length_)
-  TotQuality<-do.call(rbind,Quality_)
+  TotReads <- do.call(rbind,Reads_)
+  TotBases <- do.call(rbind,BasePairs_)
+  TotLength <- do.call(rbind,Length_)
+  TotQuality <- do.call(rbind,Quality_)
 
   p_reads <- ggplot(TotReads, aes(x=sample, y=log10(y), fill=sample)) + #use log instead of number: so that there is not too much difference between experiments
-  geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
+  geom_violin(trim=FALSE, draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
   #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
-  stat_summary(fun.data=mean_sdl,fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
+  stat_summary(fun.data=mean_sdl,fun.args = list(mult = 1), geom="pointrange", color="black", show.legend=FALSE)+
   geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
   scale_fill_brewer(palette="RdBu")+
   labs(x="",y=expression("# reads "["(log10)"]))+
@@ -151,14 +115,14 @@ NanoCompare<-function(DataIn,DataOut,Labels) { #Now is a lot faster and can deal
 
 
   p_bases <- ggplot(TotBases, aes(x=sample, y=log10(y), fill=sample)) + 
-  geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
+  geom_violin(trim=FALSE, draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
   #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
-  stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
+  stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black", show.legend=FALSE)+
   geom_jitter(shape=16, position=position_jitter(.05), size=.5, color="black", show.legend=FALSE)+ ## check
   scale_fill_brewer(palette="RdBu")+
   labs(x="",y=expression("# bps "["(log10)"]))+  
   theme_minimal()+
-  theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40", fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
   facet_wrap(~ times, scale="free_y", nrow=1)
 
 
@@ -195,8 +159,6 @@ NanoCompare<-function(DataIn,DataOut,Labels) { #Now is a lot faster and can deal
   theme_minimal()+
   theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
   facet_wrap(~ times, scale="free_y", nrow=1)
-   
-
    
   p_quality <- ggplot(TotQuality, aes(x=sample, y=y, fill=sample)) + 
   geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
