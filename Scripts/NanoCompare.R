@@ -35,10 +35,10 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
 
   #get data inside the DataForComparison folder.
 
-  Reads_<-list()
-  BasePairs_<-list()
-  Length_<-list()
-  Quality_<-list()
+  reads.data <- vector(mode = "list", length(DataIn))
+  bps.data <- vector(mode = "list", length(DataIn))
+  length.data <- vector(mode = "list", length(DataIn))
+  quality.data <- vector(mode = "list", length(DataIn))
 
   for (i in 1:(length(DataIn))) {
     
@@ -81,26 +81,26 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
     }
 
     Reads$times <- Times
-    Reads_[[i]] <- Reads
+    reads.data[[i]] <- Reads
     BasePairs <- read.table(file.path(DataIn[i], 'Bases.txt'), sep='\t', header=TRUE)
     BasePairs$sample <- as.character(Labels[i])
     BasePairs$times <- Times
 
-    BasePairs_[[i]] <- BasePairs    
+    bps.data[[i]] <- BasePairs    
     Length <- read.table(file.path(DataIn[i], 'Length.txt'), sep='\t', header=TRUE)
     Length$sample <- as.character(Labels[i])
     Length$times <- Times
-    Length_[[i]] <- Length
+    length.data[[i]] <- Length
     Quality <- read.table(file.path(DataIn[i], 'Quality.txt'), sep='\t', header=TRUE)
     Quality$sample <- as.character(Labels[i])
     Quality$times <- Times
-    Quality_[[i]] <- Quality
+    quality.data[[i]] <- Quality
   }
 
-  TotReads <- do.call(rbind,Reads_)
-  TotBases <- do.call(rbind,BasePairs_)
-  TotLength <- do.call(rbind,Length_)
-  TotQuality <- do.call(rbind,Quality_)
+  TotReads <- do.call(rbind,reads.data)
+  TotBases <- do.call(rbind,bps.data)
+  TotLength <- do.call(rbind,length.data)
+  TotQuality <- do.call(rbind,quality.data)
 
   p_reads <- ggplot(TotReads, aes(x=sample, y=log10(y), fill=sample)) + #use log instead of number: so that there is not too much difference between experiments
   geom_violin(trim=FALSE, draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
