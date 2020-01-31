@@ -51,7 +51,7 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
     Reads <- read.table(file.path(DataIn[i], 'Reads.txt'), sep='\t', header=TRUE)
     Reads$sample <- as.character(Labels[i])
     
-    Times <- c()
+    Times <- NULL
 
     for (l in 1:length(Reads$x)) {
       if (as.numeric(Reads$x[l]) >=0 && as.numeric(Reads$x[l]) < 10) {
@@ -113,7 +113,6 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
   facet_wrap(~ times, scale="free_y", nrow=1)
 
-
   p_bases <- ggplot(TotBases, aes(x=sample, y=log10(y), fill=sample)) + 
   geom_violin(trim=FALSE, draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
   #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
@@ -125,7 +124,6 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40", fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
   facet_wrap(~ times, scale="free_y", nrow=1)
 
-
   p_bases_single <- ggplot(TotBases, aes(x=sample, y=log10(y), fill=sample)) + 
   geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
   #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
@@ -136,7 +134,6 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   theme_minimal()+
   theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
   facet_wrap(~ times, scale="free_y", nrow=1)
-
 
   p_length <- ggplot(TotLength, aes(x=sample, y=y, fill=sample)) + 
   geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
