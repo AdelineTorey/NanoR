@@ -42,7 +42,7 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
 
   for (i in 1:(length(DataIn))) {
     
-    IsCorrect<-list.files(DataIn[i])
+    IsCorrect <- list.files(DataIn[i])
 
     if (length(IsCorrect) != 4) { #check
       stop("Expected different number of files in ", DataIn[i])
@@ -54,7 +54,7 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
     Times <- NULL
 
     for (l in 1:length(Reads$x)) {
-      if (as.numeric(Reads$x[l]) >=0 && as.numeric(Reads$x[l]) < 10) {
+      if (as.numeric(Reads$x[l]) >= 0 && as.numeric(Reads$x[l]) < 10) {
         Times[l]<-'0-10 hrs'
       }
       if (as.numeric(Reads$x[l]) >= 10 && as.numeric(Reads$x[l]) < 20) {
@@ -103,81 +103,82 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   TotQuality <- do.call(rbind,quality.data)
 
   p_reads <- ggplot(TotReads, aes(x=sample, y=log10(y), fill=sample)) + #use log instead of number: so that there is not too much difference between experiments
-  geom_violin(trim=FALSE, draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
-  #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
-  stat_summary(fun.data=mean_sdl,fun.args = list(mult = 1), geom="pointrange", color="black", show.legend=FALSE)+
-  geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
-  scale_fill_brewer(palette="RdBu")+
-  labs(x="",y=expression("# reads "["(log10)"]))+
-  theme_minimal()+
-  theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
-
+    ## scale_y_log10() or y=log10(y)?
+    geom_violin(trim=FALSE, draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
+    #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
+    stat_summary(fun.data=mean_sdl,fun.args = list(mult = 1), geom="pointrange", color="black", show.legend=FALSE)+
+    geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
+    scale_fill_brewer(palette="RdBu")+
+    labs(x="",y=expression("# reads "["(log10)"]))+
+    theme_minimal()+
+    theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
+    facet_wrap(~ times, nrow = 1) ## to separate the violin plots in terms of time
+  
   p_bases <- ggplot(TotBases, aes(x=sample, y=log10(y), fill=sample)) + 
-  geom_violin(trim=FALSE, draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
-  #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
-  stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black", show.legend=FALSE)+
-  geom_jitter(shape=16, position=position_jitter(.05), size=.5, color="black", show.legend=FALSE)+ ## check
-  scale_fill_brewer(palette="RdBu")+
-  labs(x="",y=expression("# bps "["(log10)"]))+  
-  theme_minimal()+
-  theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40", fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+    geom_violin(trim=FALSE, draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
+    #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black", show.legend=FALSE)+
+    geom_jitter(shape=16, position=position_jitter(.05), size=.5, color="black", show.legend=FALSE)+ ## check
+    scale_fill_brewer(palette="RdBu")+
+    labs(x="",y=expression("# bps "["(log10)"]))+  
+    theme_minimal()+
+    theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40", fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
+    facet_wrap(~ times, nrow=1)
 
   p_bases_single <- ggplot(TotBases, aes(x=sample, y=log10(y), fill=sample)) + 
-  geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
-  #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
-  stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
-  geom_jitter(shape=16, position=position_jitter(.05), size=.5, color="black", show.legend=FALSE)+ ## check
-  scale_fill_brewer(palette="RdBu")+
-  labs(x="",y=expression("# bps "["(log10)"]))+  
-  theme_minimal()+
-  theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+    geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
+    #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
+    geom_jitter(shape=16, position=position_jitter(.05), size=.5, color="black", show.legend=FALSE)+ ## check
+    scale_fill_brewer(palette="RdBu")+
+    labs(x="",y=expression("# bps "["(log10)"]))+  
+    theme_minimal()+
+    theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
+    facet_wrap(~ times, nrow=1)
 
   p_length <- ggplot(TotLength, aes(x=sample, y=y, fill=sample)) + 
-  geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
-  #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
-  stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
-  geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
-  scale_fill_brewer(palette="RdBu")+
-  labs(x="",y=expression("length "["(bps)"]))+  
-  theme_minimal()+
-  theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+    geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
+    #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
+    geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
+    scale_fill_brewer(palette="RdBu")+
+    labs(x="",y=expression("length "["(bps)"]))+  
+    theme_minimal()+
+    theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
+    facet_wrap(~ times, nrow=1)
 
   p_length_single <- ggplot(TotLength, aes(x=sample, y=y, fill=sample)) + 
-  geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
-  #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
-  stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
-  geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
-  scale_fill_brewer(palette="RdBu")+
-  labs(x="",y=expression("length "["(bps)"]))+  
-  theme_minimal()+
-  theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+    geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
+    #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
+    geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
+    scale_fill_brewer(palette="RdBu")+
+    labs(x="",y=expression("length "["(bps)"]))+  
+    theme_minimal()+
+    theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
+    facet_wrap(~ times, nrow=1)
    
   p_quality <- ggplot(TotQuality, aes(x=sample, y=y, fill=sample)) + 
-  geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
-  #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
-  stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
-  geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
-  scale_fill_brewer(palette="RdBu")+
-  labs(x="",y=expression("quality "["(phred)"]))+
-  theme_minimal()+
-  theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+    geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
+    #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
+    geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
+    scale_fill_brewer(palette="RdBu")+
+    labs(x="",y=expression("quality "["(phred)"]))+
+    theme_minimal()+
+    theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
+    facet_wrap(~ times, nrow=1)
 
   p_quality_single <- ggplot(TotQuality, aes(x=sample, y=y, fill=sample)) + 
-  geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
-  #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
-  stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
-  geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
-  scale_fill_brewer(palette="RdBu")+
-  labs(x="",y=expression("quality "["(phred)"]))+
-  theme_minimal()+
-  theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+    geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
+    #geom_boxplot(width=0.1, fill="white", show.legend=FALSE)+
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult = 1), geom="pointrange", color="black",show.legend=FALSE)+
+    geom_jitter(shape=16, position=position_jitter(.05), size=.5, fill="grey30", show.legend=FALSE)+ ## check
+    scale_fill_brewer(palette="RdBu")+
+    labs(x="",y=expression("quality "["(phred)"]))+
+    theme_minimal()+
+    theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
+    facet_wrap(~ times, nrow=1)
 
   pdf(file.path(Directory,'Violins_All.pdf'), height=5*length(DataIn), width=7*length(DataIn), onefile=TRUE) #teorethically, up to infinite number of experiments can be compared
     
@@ -211,7 +212,6 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   print(p_length_single, vp=define_region(1, 1))
   dev.off()
 
-
   pdf(file.path(Directory,'Violins_Quality.pdf'), height=5, width=7*length(DataIn), onefile=TRUE) #teorethically, up to infinite number of experiments can be compared
 
   grid.newpage()
@@ -219,14 +219,9 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   print(p_quality_single, vp=define_region(1, 1))
   dev.off()
 
-
-
-
   ###SPEEDTEST ### 
 
   ## it would be nice to have a plot for speed test in terms of bps productivity but for the moment just rely on the others for a complete overview
-
-
 
   message("Done")
 }
