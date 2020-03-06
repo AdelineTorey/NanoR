@@ -1,4 +1,3 @@
-
 ############################################ NanoPrepareG ############################################
 
 
@@ -23,112 +22,36 @@
 #' List<-NanoPrepareG(Data, Data, Cores=5, Label=Label)
 
 
+NanoPrepareG <- function(DataSummary, DataFastq, Label) {
 
-
-NanoPrepareG<-function(DataSummary, DataFastq, Cores=1,Label) {
-
-    
-  FastqFiles<-list.files(DataFastq,pattern=".fastq",full.names=TRUE, recursive=TRUE)
-  #FastqFilesPathOrdered<-FastqFiles[order(as.numeric(gsub("[^0-9]+", "", FastqFiles)))]
+  FastqFiles <- list.files(DataFastq, pattern = ".fastq", full.names = TRUE, recursive = TRUE)
+  SummariesFiles <- list.files(DataSummary, full.names = TRUE, pattern = "sequencing_summary", recursive = TRUE)
+  label <- as.character(Label)         
+  
+  ## print message with number of files in folder
   message(length(FastqFiles), " passed .fastq files in folder")
-  SummariesFiles<-list.files(DataSummary,full.names=TRUE,pattern="sequencing_summary", recursive=TRUE)
-  label<-as.character(Label)         
-  
-
-  #SummariesFilesOrdered<-SummariesFiles[order(as.numeric(gsub("[^0-9]+", "", SummariesFiles)))]
   message(length(SummariesFiles), " sequencing summary files in folder")
-  
   message("Reading and organizing sequencing summary ...")
-    
-  Read_Table_Summary_SC<-function(File) { #function for single core
+  
 
-    Table<-read.table(File,header=FALSE,sep="\t",skip=1)
-    RealativeTimeToAdd<-(as.numeric(Table[,8])+as.numeric(Table[,10]))## calculate a relative time that will be rescaled
-    #SummaryTable<-cbind(Table,RealativeTimeToAdd)
-    #Flowcell_ID_Label<-unlist(strsplit(as.character(Table[,1]),"_"))[4]
-    #Flowcell_ID<-rep(Flowcell_ID_Label,dim(Table)[1])
-    read_Id<-as.character(Table[,2])
-    Channel<-as.numeric(Table[,4])
-    Mux<-rep(NA, nrow(Table))
-    Length<-as.numeric(Table[,11])
-    Qscore<-as.numeric(Table[,12])
-    #Relative_Time<-as.numeric(SummaryTable[,14])
-    Table<-cbind(Read_Id,Channel,Mux,RealativeTimeToAdd,Length,Qscore)
+    Read_Table_Summary <- function(File){
+
+    Table <- read.table(File, header = FALSE, sep="\t", skip=1)
+
+    RelativeTimeToAdd <- (as.numeric(Table[,11])+as.numeric(Table[,13]))## calculate a relative time that will be rescaled
+    Read_Id <- as.character(Table[,3])
+    Channel <- as.numeric(Table[,5])
+    Mux <- as.numeric(Table[,6])    
+    Length <- as.numeric(Table[,14])
+    Qscore <- as.numeric(Table[,15])
+    Table <- cbind(Read_Id, Channel, Mux, RelativeTimeToAdd, Length, Qscore)
     return(Table)
-    
   }
 
-  Read_Table_Summary<-function(i,File) {
-
-    Table<-read.table(File[[i]],header=FALSE,sep="\t",skip=1)
-    RealativeTimeToAdd<-(as.numeric(Table[,8])+as.numeric(Table[,10]))## calculate a relative time that will be rescaled
-    #SummaryTable<-cbind(Table,RealativeTimeToAdd)
-    #Flowcell_ID_Label<-unlist(strsplit(as.character(Table[,1]),"_"))[4]
-    #Flowcell_ID<-rep(Flowcell_ID_Label,dim(Table)[1])
-    Read_Id<-as.character(Table[,2])
-    Channel<-as.numeric(Table[,4])
-    Mux<-rep(NA, nrow(Table))
-    Length<-as.numeric(Table[,11])
-    Qscore<-as.numeric(Table[,12])
-    #Relative_Time<-as.numeric(SummaryTable[,14])
-    Table<-cbind(Read_Id,Channel,Mux,RealativeTimeToAdd,Length,Qscore)
-    return(Table)
-    
-  } 
-
-  Read_Table_Summary_New<-function(File) {
-
-    Table<-read.table(File,header=FALSE,sep="\t",skip=1)
-
-    RealativeTimeToAdd<-(as.numeric(Table[,11])+as.numeric(Table[,13]))## calculate a relative time that will be rescaled
-    #SummaryTable<-cbind(Table,RealativeTimeToAdd)
-    #Flowcell_ID_Label<-unlist(strsplit(as.character(Table[,1]),"_"))[4]
-    #Flowcell_ID<-rep(Flowcell_ID_Label,dim(Table)[1])
-    Read_Id<-as.character(Table[,3])
-    Channel<-as.numeric(Table[,5])
-    Mux<-as.numeric(Table[,6])    
-    Length<-as.numeric(Table[,14])
-    Qscore<-as.numeric(Table[,15])
-    #Relative_Time<-as.numeric(SummaryTable[,14])
-    Table<-cbind(Read_Id,Channel,Mux,RealativeTimeToAdd,Length,Qscore)
-    return(Table)
-
-  }
-
-  if (length(SummariesFiles) == 1) {
-
-    SummaryTable<-Read_Table_Summary_New(SummariesFiles) #if only one table, assume is the new format
-
-  }
-
-  else { #old behaviour with multiple sequencing summaries
-    
-    if (Cores > 1) {
-
-      library(parallel)
-
-      cl <- makeCluster(as.numeric(Cores)) 
-      clusterExport(cl, c("Read_Table_Summary","SummariesFiles"),envir=environment())
-      List<-parLapply(cl, c(1:length(SummariesFiles)),Read_Table_Summary,SummariesFiles)
-      stopCluster(cl)     
-    }
-
-    else {
-
-      List<-lapply(SummariesFiles,Read_Table_Summary_SC)    
-
-    }
-
-    SummaryTable<-do.call(rbind,List)    
-
-  }
-
-  colnames(SummaryTable)<-c("Read Id","Channel Number","Mux Number","Relative Time","Length of Read","Quality")
-  List<-list(FastqFiles,SummaryTable,label)
+  SummaryTable <- Read_Table_Summary(SummariesFiles) #if only one table, assume is the new format
+  colnames(SummaryTable) <- c("Read Id", "Channel Number", "Mux Number", "Relative Time", "Length of Read", "Quality")
+  List <- list(FastqFiles, SummaryTable, label)
 
   message("Done")
-
   return(List)
-  
 }
-
