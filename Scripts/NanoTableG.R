@@ -18,8 +18,10 @@
 #' # Calculate GC content
 #' Table<-NanoTableG(List, DataOut, GCC=TRUE)
 
+## add to description file
+library(ShortRead)
 
-NanoTableG<-function(NanoGList,DataOut,GCC=FALSE) { #using multiple cores to deal with .fastq files is not a good idea
+NanoTableG <- function(NanoGList, DataOut, GCC = FALSE) { #using multiple cores to deal with .fastq files is not a good idea
   
 
   Label<-NanoGList[[3]]    
@@ -43,42 +45,36 @@ NanoTableG<-function(NanoGList,DataOut,GCC=FALSE) { #using multiple cores to dea
     #Flowcell_ID_Label<-as.character("FC5")
   #}
 
-
-  Directory<-file.path(DataOut,Label)
-  dir.create(Directory,showWarnings=FALSE, recursive=TRUE)
-
-  TableInDirectory<-list.files(Directory,pattern="metadata.txt")
+  Directory <- file.path(DataOut, Label) ## path for output
+  dir.create(Directory, showWarnings = FALSE, recursive=TRUE)
+  TableInDirectory <- list.files(Directory, pattern="metadata.txt")
 
   if(length(TableInDirectory) != 0) {
-
     stop("Cannot use a directory that already contains other results")
-  
   }
 
-  Read_Id<-as.character(NanoGList[[2]][,1])
-  Channel<-as.numeric(NanoGList[[2]][,2])
-  Mux<-NanoGList[[2]][,3]
-  Length<-as.numeric(NanoGList[[2]][,5])
-  Qscore<-as.numeric(NanoGList[[2]][,6])
-  Relative_Time<-as.numeric(NanoGList[[2]][,4])
+  Read_Id <- as.character(NanoGList[[2]][,1])
+  Channel <- as.numeric(NanoGList[[2]][,2])
+  Mux <- NanoGList[[2]][,3]
+  Length <- as.numeric(NanoGList[[2]][,5])
+  Qscore <- as.numeric(NanoGList[[2]][,6])
+  Relative_Time <- as.numeric(NanoGList[[2]][,4])
 
-  if (GCC == TRUE) {
+  if (GCC) {
       
-    library(ShortRead)
-    #library(seqinr)
     message("Calculating GC content...") ## very hard to speed up Fastq parsing in R ... :( 
     # 1 hour for 550 fastq file, 8000 sequences each. Definitely slow.
     
     
-    FastqFilesPath<-NanoGList[[1]]
+    FastqFilesPath <- NanoGList[[1]]
     
-    GCC<-function(seq) {      
-      GC<-sum(gregexpr('[GgCc]',seq)[[1]] > 0)/nchar(seq) #faster than using library
+    GCC <- function(seq) {      
+      GC <- sum(gregexpr('[GgCc]',seq)[[1]] > 0)/nchar(seq) #faster than using library
       return(GC)
     }    
     
-    Gc_Con<-function(Element) {
-      fqFile<-FastqFile(Element) ## deal with possible error. Not possible to remove single ill-formatted .fastq as far as I know.
+    Gc_Con <- function(Element) {
+      fqFile <- FastqFile(Element) ## deal with possible error. Not possible to remove single ill-formatted .fastq as far as I know.
       Fastq <- tryCatch({
         readFastq(fqFile)},
         error = function(cond) {
@@ -91,35 +87,35 @@ NanoTableG<-function(NanoGList,DataOut,GCC=FALSE) { #using multiple cores to dea
         warning("Ill-formatted .fastq file: ", Element, " .Skipped")
       }
       else {
-        CharRead<-as.character(sread(Fastq))
+        CharRead <- as.character(sread(Fastq))
         close(fqFile)
-        GC<-lapply(CharRead,GCC)
+        GC <- lapply(CharRead, GCC)
       }
       return(GC)
     }
 
-    List<-lapply(FastqFilesPath,Gc_Con)      
-    GC_Content<-unlist(List)
-    GCL<-length(GC_Content)
-    NT<-nrow(NanoGList[[2]])
+    List <- lapply(FastqFilesPath,Gc_Con)      
+    GC_Content <- unlist(List)
+    GCL <- length(GC_Content)
+    NT <- nrow(NanoGList[[2]])
     
     if (GCL != NT) { ##lack of some fastq sequences . Get GC content from what we have in the future. Do not sample what we have
-      LackOfReads<-NT-GCL
-      GC_To_Add<-rep(NA, LackOfReads)
-      GC_Content<-c(GC_Content,GC_To_Add)
+      LackOfReads <- NT-GCL
+      GC_To_Add <- rep(NA, LackOfReads)
+      GC_Content <- c(GC_Content,GC_To_Add)
     }
     
-    Table_Tot<-cbind(Read_Id,Channel,Mux,Relative_Time,Length,Qscore,GC_Content)
-    colnames(Table_Tot)<-c("Read Id","Channel Number","Mux Number","Relative Time","Length of Read","Quality", "GC content")
+    Table_Tot <- cbind(Read_Id, Channel, Mux, Relative_Time, Length, Qscore, GC_Content)
+    colnames(Table_Tot) <- c("Read Id","Channel Number","Mux Number","Relative Time","Length of Read","Quality", "GC content")
     write.table(Table_Tot, file.path(Directory, 'metadata.txt'), sep="\t", quote=FALSE, col.names=T, row.names=FALSE) 
   
   }
   
   else {
         
-    GC_Content<-rep("GC_Content",nrow(NanoGList[[2]]))
-    Table_Tot<-cbind(Read_Id,Channel,Mux,Relative_Time,Length,Qscore,GC_Content)
-    colnames(Table_Tot)<-c("Read Id","Channel Number","Mux Number","Relative Time","Length of Read", "Quality", "GC content")
+    GC_Content <- rep("GC_Content", nrow(NanoGList[[2]]))
+    Table_Tot <-cbind(Read_Id, Channel, Mux, Relative_Time, Length, Qscore, GC_Content)
+    colnames(Table_Tot) <- c("Read Id","Channel Number","Mux Number","Relative Time","Length of Read", "Quality", "GC content")
     write.table(Table_Tot, file.path(Directory, 'metadata.txt'), sep="\t", quote=FALSE, col.names=T, row.names=FALSE) 
   }
 
