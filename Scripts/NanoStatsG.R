@@ -27,17 +27,19 @@
 #' # Save ggplot2 tables:
 #' NanoStatsG(List,Table, DataOut=DataOut,KeepGGObj=TRUE)
 
+## should be in description file
+library(reshape2)
+library(scales)
+library(ggplot2)
+library(RColorBrewer)
+library(grid)
+library(gridExtra)
 
-NanoStatsG<-function(NanoGList,NanoGTable,DataOut,KeepGGObj=FALSE) {
+NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
 
   #recreate the same plot of NanoStatsM, but requires different parsing of metadata table
   
-  library(reshape2)
-  library(scales)
-  library(ggplot2)
-  library(RColorBrewer)
-  library(grid)
-  library(gridExtra)
+
   
   
   Increment <- function(x)
