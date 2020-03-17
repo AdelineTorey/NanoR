@@ -36,12 +36,25 @@ library(grid)
 library(gridExtra)
 
 NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
-
+  
+  Label <- NanoGList[[3]]    
+  
+  Dirs <- file.path(DataOut, Label)
+  Directory <- file.path(DataOut, Label)  #here is the metadata.txt
+  ## seems to appear twice - Dirs and Directory are identical
+  
+  TableInDirectory <- list.files(Directory,pattern="metadata.txt")
+    if(length(TableInDirectory) == 0) {
+    stop("Use the same directory specified for NanoTableG function")
+  }
+  
+  CumulativeInDirectory <- list.files(Directory,pattern=("Yield.pdf"))
+    if(length(CumulativeInDirectory) != 0) {
+    stop("Can't use a directory that already contains previous results")  
+  }
+  ## functions ##
+  
   #recreate the same plot of NanoStatsM, but requires different parsing of metadata table
-  
-
-  
-  
   Increment <- function(x)
   {
     return(x+8)
@@ -67,44 +80,22 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
     viewport(layout.pos.row = row, layout.pos.col = col)
   }
 
-  Label<-NanoGList[[3]]    
-  Dirs<-file.path(DataOut, Label)
-  #FCID<-list.files(file.path(Dirs), full.names=FALSE, include.dirs=TRUE, pattern="^FC[12345]")
-
-  #if(length(FCID) == 0) {
-    #stop("Use the same directory specified for NanoTableG function")
-  #}
-
-  Directory<-file.path(DataOut, Label)  #here is the metadata.txt
-
-  TableInDirectory<-list.files(Directory,pattern="metadata.txt")
-
-  if(length(TableInDirectory) == 0) {
-    stop("Use the same directory specified for NanoTableG function")
-  }
-    
-  
-  CumulativeInDirectory<-list.files(Directory,pattern=("Yield.pdf"))
-  
-  if(length(CumulativeInDirectory) != 0) {
-    stop("Can't use a directory that already contains previous results")  
-  }
-  
+  ################
   options(scipen=9999)
-  setwd(Directory)
+  #setwd(Directory)
 
           
-  Really_Pass_File<-which(as.numeric(NanoGTable[,6]) >= 7)
-  List.Files.HDF5_Fail_Length<-length(which(as.numeric(NanoGTable[,6]) < 7))
-  List.Files.HDF5_Pass.length<-nrow(NanoGTable)-List.Files.HDF5_Fail_Length
+  Really_Pass_File <- which(as.numeric(NanoGTable[,6]) >= 7)
+  List.Files.HDF5_Fail_Length <- length(which(as.numeric(NanoGTable[,6]) < 7))
+  List.Files.HDF5_Pass.length <- nrow(NanoGTable)-List.Files.HDF5_Fail_Length
   
-  NanoTable2<-NanoGTable[Really_Pass_File,]
+  NanoTable2 <- NanoGTable[Really_Pass_File,]
   
   write.table(NanoTable2, file.path(Directory, 'metadata.fltrd.txt'), col.names=T, row.names=F, quote=F, sep="\t")
    
-  Table_HDF5_Def<-NanoTable2[,1:6]   
-  Time_2<-as.numeric(Table_HDF5_Def[,4])
-  Run_Duration<-round(as.numeric(difftime(as.POSIXct(max(Time_2),origin="1/1/1970"), as.POSIXct(min(Time_2), origin="1/1/1970"), units="hours")))
+  Table_HDF5_Def <- NanoTable2[,1:6]   
+  Time_2 <- as.numeric(Table_HDF5_Def[,4])
+  Run_Duration <- round(as.numeric(difftime(as.POSIXct(max(Time_2),origin="1/1/1970"), as.POSIXct(min(Time_2), origin="1/1/1970"), units="hours")))
   Relative_Time <- scales::rescale(Time_2, to=c(0,Run_Duration))  
   #Table_HDF5_Def<-cbind(Table_HDF5,Time_Rescaled)
   #colnames(Table_HDF5_Def)<-c("Flowcell ID","Read Id","Channel Number","Relative Time","Length of Read","Quality","Relative Experimental Time")
