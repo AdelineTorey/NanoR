@@ -108,19 +108,20 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
     
   message("Analyzing...")
   
-  Reads_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Base_Pairs_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Max_Length_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Mean_Length_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Min_Length_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Min_Quality_Score_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Mean_Quality_Score_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
-  Max_Quality_Score_Per_Hour<-rep(0, length(Relative_Time_Per_Hours))
+  lenRTPH <- length(Relative_Time_Per_Hours)
+  Reads_Per_Hour <- numeric(lenRTPH)
+  Base_Pairs_Per_Hour <- numeric(lenRTPH)
+  Max_Length_Per_Hour <- numeric(lenRTPH)
+  Mean_Length_Per_Hour <- numeric(lenRTPH)
+  Min_Length_Per_Hour <- numeric(lenRTPH)
+  Min_Quality_Score_Per_Hour <- numeric(lenRTPH)
+  Mean_Quality_Score_Per_Hour <- numeric(lenRTPH)
+  Max_Quality_Score_Per_Hour <- numeric(lenRTPH)
   
   
-  for (ii in 1:(length(Relative_Time_Per_Hours))) {
+  for (ii in seq_len(lenRTPH)) {
     
-    if (ii < length(Relative_Time_Per_Hours)) {
+    if (ii < lenRTPH {
       Index_Hours<-which(Relative_Time >= Relative_Time_Per_Hours[ii] & Relative_Time < Relative_Time_Per_Hours[ii+1])
       if (length(Index_Hours) == 0) {
         next
@@ -173,7 +174,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
     
     Table_HDF5_Re <- vector(mode = "list", length(Channels_Number))
     
-    for (iii in 1:length(Channels_Number)) {
+    for (iii in seq_len(length(Channels_Number))) {
       Ind_Chann<-which(Channel_Vector == Channels_Number[iii])
       #Mux_Associated<-sort(Mux_Vector[Ind_Chann], index.return=TRUE)$ix
       if (length(Ind_Chann) == 0) {
@@ -208,7 +209,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
     
     Table_HDF5_Re <- vector(mode = "list", length(Channels_Number))
     
-    for (iii in 1:length(Channels_Number)) {
+    for (iii in seq_len(length(Channels_Number))) {
       Ind_Chann<-which(Channel_Vector == Channels_Number[iii])
       Mux_Associated<-sort(Mux_Vector[Ind_Chann], index.return=TRUE)$ix
       if (length(Ind_Chann) == 0) {
@@ -477,7 +478,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
     
     List_Of_Mux <- vector(mode = "list", length(Channels_Number))
     
-    for (iii in 1:length(Channels_Number)) {
+    for (iii in seq_len(length(Channels_Number))) {
       Ind_Chann<-which(Chan == Channels_Number[iii])
       Mux_Associated_Number<-sort(Mu[Ind_Chann])
       Table_Mux <- NULL
