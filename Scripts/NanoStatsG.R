@@ -277,7 +277,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
   
   Cumulative_Plot<-grid.arrange(Cumulative_Reads_Plot,Cumulative_Base_Pairs_Plot, nrow=2, ncol=1)
   
-  ggsave("Yield.pdf", device="pdf", Cumulative_Plot, height=10,width=15)
+  ggsave(file.path(Directory, "Yield.pdf"), device="pdf", Cumulative_Plot, height=10,width=15)
 
 
   #PLOT PER-HOUR READS/BPs/QUALITY/LENGTH
@@ -369,7 +369,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
   
   Others_Plot<-grid.arrange(Reads_Per_Hour_Plot,Base_Pairs_Per_Hour_Plot,Length_Per_Hour_Plot,Quality_Score_Per_Hour_Plot, nrow=2, ncol=2)
   
-  ggsave("RBLQ.pdf", device="pdf", Others_Plot, height=10,width=15)
+  ggsave(file.path(Directory, "RBLQ.pdf"), device="pdf", Others_Plot, height=10, width=15)
   
   #PASS/FAIL
   
@@ -462,7 +462,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
   Length_VS_Quality_Plot<-grid.arrange(hist_top_mean_length, empty, scatter, hist_right_mean_quality, ncol=2, nrow=2, widths=c(4,1), heights=c(1, 4))
     
     
-  ggsave("LvsQ.pdf", device="pdf", Length_VS_Quality_Plot, height=10,width=15)
+  ggsave(file.path(Directory, "LvsQ.pdf"), device="pdf", Length_VS_Quality_Plot, height=10,width=15)
   
   
   
@@ -624,7 +624,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
     
     Plot_Tot<-grid.arrange(Plot_Channel_Activity,Plot_Mux_Activity,nrow=2, ncol=1, widths=15, heights=c(12,12))
 
-    ggsave("Activity.pdf", device="pdf",Plot_Tot, height=10, width=18)
+    ggsave(file.path(Directory, "Activity.pdf"), device="pdf",Plot_Tot, height=10, width=18)
 
 
   }
@@ -632,7 +632,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
 
   else {
 
-    ggsave("Activity.pdf", device="pdf",Plot_Channel_Activity, height=10, width=18)
+    ggsave(file.path(Directory, "Activity.pdf"), device="pdf",Plot_Tot, height=10, width=18)
 
   }
   
