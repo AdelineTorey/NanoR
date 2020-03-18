@@ -241,77 +241,77 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
 
   message("Plotting...")
 
-  x<-Relative_Time_Per_Hours
-  y0.1<-Cumulative_Reads
-  data0.1<-data.frame('x'=x,'y'=y0.1)
-  data0.1$group<-"reads yield"
+  x <- Relative_Time_Per_Hours
+  y0.1 <- Cumulative_Reads
+  data0.1 <- data.frame('x' = x,'y' = y0.1)
+  data0.1$group <- "reads yield"
   
   
   Cumulative_Reads_Plot<-ggplot(data0.1, aes(x=x, y=y, col=group)) +
-    geom_line(size=.5) + 
+    geom_line(size=.5, colour = "dodgerblue4") + 
     scale_x_continuous(name="time(hrs)", breaks=(seq(0,Run_Duration,2)))+
     scale_y_continuous(name="# reads")+
     #geom_ribbon(data=subset(data0.1,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
-    scale_color_manual(name='', values=c("reads yield" = "dodgerblue4"))+
+    #scale_color_manual(name='', values=c("reads yield" = "dodgerblue4"))+
     theme_bw()+
-    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))+
-    theme(legend.position="bottom")
+    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))
+    #theme(legend.position="bottom")
     #ggtitle("Cumulative Reads")
  
 
 
-  y0.2<-Cumulative_Basepairs
-  data0.2<-data.frame('x'=x,'y'=y0.2)
-  data0.2$group<-"bps yield"
+  y0.2 <- Cumulative_Basepairs
+  data0.2 <- data.frame('x' = x,'y' = y0.2)
+  data0.2$group <- "bps yield"
   
-  Cumulative_Base_Pairs_Plot<-ggplot(data0.2, aes(x=x, y=y, col=group)) +
-    geom_line(size=.5) + 
+  Cumulative_Base_Pairs_Plot <- ggplot(data0.2, aes(x=x, y=y, col=group)) +
+    geom_line(size=.5, colour = "firebrick4") + 
     scale_x_continuous(name="time(hrs)", breaks=(seq(0,Run_Duration,2)))+
     scale_y_continuous(name="# bps")+
     #geom_ribbon(data=subset(data0.2,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
-    scale_color_manual(name='', values=c("bps yield" = "firebrick4"))+
+    #scale_color_manual(name='', values=c("bps yield" = "firebrick4"))+
     theme_bw()+
-    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))+
-    theme(legend.position="bottom")
+    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))
+    #theme(legend.position="bottom")
     #ggtitle("Cumulative Base Pairs")
   
-  Cumulative_Plot<-grid.arrange(Cumulative_Reads_Plot,Cumulative_Base_Pairs_Plot, nrow=2, ncol=1)
+  Cumulative_Plot <- grid.arrange(Cumulative_Reads_Plot, Cumulative_Base_Pairs_Plot, nrow=2, ncol=1, top = textGrob("Reads and base pairs yield",gp=gpar(fontsize=20)))
   
   ggsave(file.path(Directory, "Yield.pdf"), device="pdf", Cumulative_Plot, height=10,width=15)
 
 
   #PLOT PER-HOUR READS/BPs/QUALITY/LENGTH
 
-  y1<-Reads_Per_Hour
-  data1<-data.frame('x'=x,'y'=y1)
-  data1$group<-"# reads / 30 mins"
+  y1 <- Reads_Per_Hour
+  data1 <- data.frame('x' = x, 'y' = y1)
+  data1$group <- "# reads / 30 mins"
   
   Reads_Per_Hour_Plot<-ggplot(data1, aes(x=x, y=y, col=group)) +
-    geom_line(size=.5) + 
+    geom_line(size=.5, colour = "dodgerblue4") + 
     scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2)))+
     scale_y_continuous(name="# reads")+
     #geom_ribbon(data=subset(data1,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
-    scale_color_manual(name='', values=c("# reads / 30 mins" = "dodgerblue4"))+
+    #scale_color_manual(name='', values=c("# reads / 30 mins" = "dodgerblue4"))+
     theme_bw()+
-    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))+
-    theme(legend.position="bottom")
+    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))
+    #theme(legend.position="bottom")
     #ggtitle("Reads")
   
   
-  y2<-Base_Pairs_Per_Hour
-  data2<-data.frame('x'=x,'y'=y2)
-  data2$group<-"# bps / 30 mins"
+  y2 <- Base_Pairs_Per_Hour
+  data2 <- data.frame('x' = x, 'y' = y2)
+  data2$group <- "# bps / 30 mins"
   
   
-  Base_Pairs_Per_Hour_Plot<-ggplot(data2, aes(x=x, y=y, col=group)) +
-    geom_line(size=.5) + 
+  Base_Pairs_Per_Hour_Plot <- ggplot(data2, aes(x=x, y=y, col=group)) +
+    geom_line(size=.5, colour = "firebrick4") + 
     scale_x_continuous(name="time (hrs)", breaks=(seq(0,Run_Duration,2)))+
     scale_y_continuous(name="# bps")+
     #geom_ribbon(data=subset(data2,x>=0 & x<=Run_Duration),aes(x=x,ymax=y),ymin=0,show.legend=FALSE) +
-    scale_color_manual(name='', values=c("# bps / 30 mins" = "firebrick4"))+
+    #scale_color_manual(name='', values=c("# bps / 30 mins" = "firebrick4"))+
     theme_bw()+
-    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))+
-    theme(legend.position="bottom")
+    theme(axis.line = element_line(colour = "black"), panel.border = element_blank(), panel.background = element_blank(), axis.title.x = element_text(size=11),axis.title.y = element_text(size=11))
+    #theme(legend.position="bottom")
     #ggtitle("Base Pairs")
   
   
@@ -367,7 +367,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
     #ggtitle("Quality")
   
   
-  Others_Plot<-grid.arrange(Reads_Per_Hour_Plot,Base_Pairs_Per_Hour_Plot,Length_Per_Hour_Plot,Quality_Score_Per_Hour_Plot, nrow=2, ncol=2)
+  Others_Plot<-grid.arrange(Reads_Per_Hour_Plot,Base_Pairs_Per_Hour_Plot,Length_Per_Hour_Plot,Quality_Score_Per_Hour_Plot, nrow=2, ncol=2, top = textGrob("Reads number, base pairs number, reads length and quality calculated every 30 minutes", gp=gpar(fontsize=20)))
   
   ggsave(file.path(Directory, "RBLQ.pdf"), device="pdf", Others_Plot, height=10, width=15)
   
