@@ -169,9 +169,9 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
     Channels_Number<-c(1:512)
     
     
-    Base_Pairs_Per_Channel<-c()
+    Base_Pairs_Per_Channel <- NULL
     
-    Table_HDF5_Re<-list()
+    Table_HDF5_Re <- vector(mode = "list", length(Channels_Number))
     
     for (iii in 1:length(Channels_Number)) {
       Ind_Chann<-which(Channel_Vector == Channels_Number[iii])
@@ -204,9 +204,9 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
     Channels_Number<-c(1:512)
     
     
-    Base_Pairs_Per_Channel<-c()
+    Base_Pairs_Per_Channel <- NULL
     
-    Table_HDF5_Re<-list()
+    Table_HDF5_Re <- vector(mode = "list", length(Channels_Number))
     
     for (iii in 1:length(Channels_Number)) {
       Ind_Chann<-which(Channel_Vector == Channels_Number[iii])
@@ -475,12 +475,12 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
     Mu<-as.numeric(Table_HDF5_Reordered[,3])
     Le<-as.numeric(Table_HDF5_Reordered[,5])
     
-    List_Of_Mux<-list()
+    List_Of_Mux <- vector(mode = "list", length(Channels_Number))
     
     for (iii in 1:length(Channels_Number)) {
       Ind_Chann<-which(Chan == Channels_Number[iii])
       Mux_Associated_Number<-sort(Mu[Ind_Chann])
-      Table_Mux<-c()
+      Table_Mux <- NULL
       for (lll in 1:length(Mux_Numbers)) {
         Ind_Mux<-which(Mux_Associated_Number == Mux_Numbers[lll])
         Chan_Mux<-Chan[Ind_Chann][Ind_Mux]
@@ -632,7 +632,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
 
   else {
 
-    ggsave(file.path(Directory, "Activity.pdf"), device="pdf",Plot_Tot, height=10, width=18)
+    ggsave("Activity.pdf", device="pdf",Plot_Channel_Activity, height=10, width=18)
 
   }
   
