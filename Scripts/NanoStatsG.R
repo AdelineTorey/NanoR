@@ -121,7 +121,7 @@ NanoStatsG <- function(NanoGList, NanoGTable, DataOut, KeepGGObj = FALSE) {
   
   for (ii in seq_len(lenRTPH)) {
     
-    if (ii < lenRTPH {
+    if (ii < lenRTPH) {
       Index_Hours<-which(Relative_Time >= Relative_Time_Per_Hours[ii] & Relative_Time < Relative_Time_Per_Hours[ii+1])
       if (length(Index_Hours) == 0) {
         next
