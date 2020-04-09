@@ -22,7 +22,7 @@
 library(ShortRead)
 
 ## helper function to compute GC content
-GCC <- function(seq) {      
+GC_com <- function(seq) {      
   GC <- sum(gregexpr('[GgCc]',seq)[[1]] > 0)/nchar(seq) #faster than using library
   return(GC)
 }
@@ -44,7 +44,7 @@ Gc_Con <- function(Element) {
   else {
     CharRead <- as.character(sread(Fastq))
     close(fqFile)
-    GC <- lapply(CharRead, GCC)
+    GC <- lapply(CharRead, GC_com)
   }
   return(GC)
 }
