@@ -111,7 +111,7 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   labs(x="",y=expression("# reads "["(log10)"]))+
   theme_minimal()+
   theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+  facet_wrap(~ times, scale="fixed", nrow=1)
 
   p_bases <- ggplot(TotBases, aes(x=sample, y=log10(y), fill=sample)) + 
   geom_violin(trim=FALSE, draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
@@ -122,7 +122,7 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   labs(x="",y=expression("# bps "["(log10)"]))+  
   theme_minimal()+
   theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40", fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+  facet_wrap(~ times, scale="fixed", nrow=1)
 
   p_bases_single <- ggplot(TotBases, aes(x=sample, y=log10(y), fill=sample)) + 
   geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
@@ -133,7 +133,7 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   labs(x="",y=expression("# bps "["(log10)"]))+  
   theme_minimal()+
   theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+  facet_wrap(~ times, scale="fixed", nrow=1)
 
   p_length <- ggplot(TotLength, aes(x=sample, y=y, fill=sample)) + 
   geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
@@ -144,7 +144,7 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   labs(x="",y=expression("length "["(bps)"]))+  
   theme_minimal()+
   theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+  facet_wrap(~ times, scale="fixed", nrow=1)
 
   p_length_single <- ggplot(TotLength, aes(x=sample, y=y, fill=sample)) + 
   geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
@@ -155,7 +155,7 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   labs(x="",y=expression("length "["(bps)"]))+  
   theme_minimal()+
   theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+  facet_wrap(~ times, scale="fixed", nrow=1)
    
   p_quality <- ggplot(TotQuality, aes(x=sample, y=y, fill=sample)) + 
   geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
@@ -166,7 +166,7 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   labs(x="",y=expression("quality "["(phred)"]))+
   theme_minimal()+
   theme(strip.text=element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+  facet_wrap(~ times, scale="fixed", nrow=1)
 
   p_quality_single <- ggplot(TotQuality, aes(x=sample, y=y, fill=sample)) + 
   geom_violin(trim=FALSE,draw_quantiles = c(0.25, 0.5, 0.75), show.legend=FALSE)+
@@ -177,7 +177,7 @@ NanoCompare <- function(DataIn, DataOut, Labels) { #Now is a lot faster and can 
   labs(x="",y=expression("quality "["(phred)"]))+
   theme_minimal()+
   theme(strip.background = element_blank(),panel.border = element_rect(colour = "grey40",fill=NA), axis.text.x = element_text(angle = 45, hjust = 1))+
-  facet_wrap(~ times, scale="free_y", nrow=1)
+  facet_wrap(~ times, scale="fixed", nrow=1)
 
   pdf(file.path(Directory,'Violins_All.pdf'), height=5*length(DataIn), width=7*length(DataIn), onefile=TRUE) #teorethically, up to infinite number of experiments can be compared
     
